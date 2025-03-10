@@ -7,7 +7,7 @@ name: Build and deploy Python project to Azure Function App - JobAssistAI-Docume
 on:
   push:
     branches:
-      - luan/action_workflow
+      - main
   workflow_dispatch:
 
 env:
