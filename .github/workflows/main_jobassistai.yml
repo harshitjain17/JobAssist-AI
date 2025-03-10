@@ -44,6 +44,8 @@ jobs:
           path: |
             release.zip
             !venv/
+      - name: Wait before deployment
+        run: sleep 20
 
   deploy:
     runs-on: ubuntu-latest
