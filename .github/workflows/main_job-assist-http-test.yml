@@ -38,6 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd azure_function
+          source venv/bin/activate
           pip install -r requirements.txt
 
       # Optional: Add step to run tests here
@@ -45,7 +46,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd azure_function
-          zip release.zip ./* -r
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

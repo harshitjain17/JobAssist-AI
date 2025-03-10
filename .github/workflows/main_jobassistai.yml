@@ -33,6 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd streamlit_app
+          source venv/bin/activate
           pip install -r requirements.txt
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
@@ -40,7 +41,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd streamlit_app
-          zip release.zip ./* -r
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
