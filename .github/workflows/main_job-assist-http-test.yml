@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'azure_function' # Set this to the path of the function app project
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # Set this to the path of the function app project
   PYTHON_VERSION: '3.11' # Python version
 
 jobs:
