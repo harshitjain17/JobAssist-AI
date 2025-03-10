@@ -31,18 +31,21 @@ jobs:
 
       - name: Create and start virtual environment
         run: |
+          cd azure_function
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
         run: |
-          source venv/bin/activate
+          cd azure_function
           pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip -r ../release.zip ./*
+        run: |
+          cd azure_function
+          zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
