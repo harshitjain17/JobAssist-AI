@@ -5,10 +5,12 @@ from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult
 from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient
+from openai import AzureOpenAI
 from azure.cosmos import CosmosClient
 import os
 import re
 import logging
+import json
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -18,12 +20,25 @@ app = func.FunctionApp()
 DI_ENDPOINT = os.environ["AZURE_DI_ENDPOINT"]
 DI_KEY = os.environ["AZURE_DI_KEY"]
 BLOB_CONNECTION = os.environ["BLOB_CONNECTION_STRING"]
+OPENAI_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"]
+OPENAI_KEY = os.environ["AZURE_OPENAI_KEY"]
+OPENAI_DEPLOYMENT = os.environ["AZURE_OPENAI_DEPLOYMENT"]
+OPENAI_API_VERSION = os.environ["AZURE_OPENAI_API_VERSION"]
 # COSMOS_ENDPOINT = os.environ["COSMOS_ENDPOINT"]
 # COSMOS_KEY = os.environ["COSMOS_KEY"]
 
 # Clients
-di_client = DocumentIntelligenceClient(DI_ENDPOINT, AzureKeyCredential(DI_KEY))
+di_client = DocumentIntelligenceClient(
+    endpoint=DI_ENDPOINT,
+    credential=AzureKeyCredential(DI_KEY)
+)
 blob_service = BlobServiceClient.from_connection_string(BLOB_CONNECTION)
+openai_client = AzureOpenAI(
+    azure_endpoint=OPENAI_ENDPOINT,
+    api_key=OPENAI_KEY,
+    api_version=OPENAI_API_VERSION
+)
+
 # cosmos_client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
 # db = cosmos_client.get_database_client("JobAssistDB")
 # container = db.get_container_client("Reports")
@@ -68,47 +83,40 @@ def main(myblob: func.InputStream):
         logging.error(f"Document Intelligence (prebuilt-read) failed: {str(e)}")
         raise
     
-    # Extract entities intelligently
-    entities = {
-        "raw_text": "",  # Full extracted text
-        "names": [],     # Potential employee names
-        "dates": [],     # Detected dates
-        "progress": []   # General text chunks as progress notes
-    }
+    # Define OpenAI prompt for intelligent entity extraction in JSON mode
+    prompt = f"""
+    You are an AI assistant designed to process case notes written by job coaches for disabled individuals under a supported employment program. 
+    These notes document the progress, activities, and support provided to clients, and are used to generate formatted reports for multiple stakeholders (e.g., government agencies, employers). 
+    Your task is to intelligently extract all relevant entities from the provided text, such as names, dates, activities, support details, or anything else pertinent to the employment program context.
 
-    # Aggregate all text from paragraphs
-    if result.paragraphs:
-        entities["raw_text"] = "\n".join([p.content for p in result.paragraphs])
+    Analyze the following text extracted from a case note and identify key entities dynamically. Do not limit yourself to a predefined list—extract whatever makes sense based on the content and context. 
+    Return the results as a valid JSON object. If an entity has multiple values, use a list. If something is unclear or missing, use "Unknown" or omit it as appropriate. Ensure the output is tailored to support generating stakeholder reports.
 
-    # Extract entities from DI output
-    if result.key_value_pairs:
-        for kvp in result.key_value_pairs:
-            key = kvp.key.content if kvp.key else "Unknown"
-            value = kvp.value.content if kvp.value else "Unknown"
-            # Heuristic: Look for common entity types
-            if "name" in key.lower() or "employee" in key.lower():
-                entities["names"].append(value)
-            elif "date" in key.lower():
-                entities["dates"].append(value)
-            elif "progress" in key.lower() or "notes" in key.lower():
-                entities["progress"].append(value)
+    Include the word "json" in your response to enable JSON mode.
 
-    # Fallback: Extract from raw text if no key-value pairs
-    if not entities["names"] or not entities["dates"]:
-        text = entities["raw_text"]
-        # Simple regex for dates (e.g., MM/DD/YY or MM-DD-YYYY)
-        dates = re.findall(r"\d{1,2}[/-]\d{1,2}[/-]\d{2,4}", text)
-        entities["dates"].extend(dates)
-        # Names: Look for capitalized words (crude heuristic)
-        names = re.findall(r"\b[A-Z][a-z]+\b(?:\s[A-Z][a-z]+\b)?", text)
-        entities["names"].extend([n for n in names if n not in entities["dates"]])
-        # Progress: Use remaining text chunks
-        if not entities["progress"]:
-            entities["progress"].append(text.strip())
+    Text:
+    {raw_text}
+    """
 
-    # Log extracted entities for now
-    logging.info(f"Extracted entities for {note_id}: {entities}")
-
+    # Call OpenAI with JSON mode
+    try:
+        response = openai_client.chat.completions.create(
+            model=OPENAI_DEPLOYMENT,
+            response_format={"type": "json_object"},  # Enable JSON mode
+            messages=[
+                {"role": "system", "content": "You are a precise entity extraction tool designed to output JSON for supported employment case notes."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,    # Low temperature for structured output
+            max_tokens=1000     # Increased to handle complex notes
+        )
+        entities_json = response.choices[0].message.content.strip()
+        entities = json.loads(entities_json)
+        logging.info(f"Extracted entities for {note_id}: {json.dumps(entities, indent=2)}")
+    except Exception as e:
+        logging.error(f"OpenAI processing failed: {str(e)}")
+        entities = {"error": "Failed to process with OpenAI", "raw_text": raw_text}
+        logging.info(f"Fallback entities for {note_id}: {json.dumps(entities, indent=2)}")
 
 
     # # Generate and save reports
