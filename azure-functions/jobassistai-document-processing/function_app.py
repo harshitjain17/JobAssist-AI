@@ -85,15 +85,11 @@ def main(myblob: func.InputStream):
     
     # Define OpenAI prompt for intelligent entity extraction in JSON mode
     prompt = f"""
-    You are an AI assistant designed to process case notes written by job coaches for disabled individuals under a supported employment program. 
-    These notes document the progress, activities, and support provided to clients, and are used to generate formatted reports for multiple stakeholders (e.g., government agencies, employers). 
-    Your task is to intelligently extract all relevant entities from the provided text, such as names, dates, activities, support details, or anything else pertinent to the employment program context.
-
-    Analyze the following text extracted from a case note and identify key entities dynamically. Do not limit yourself to a predefined list—extract whatever makes sense based on the content and context. 
-    Return the results as a valid JSON object. If an entity has multiple values, use a list. If something is unclear or missing, use "Unknown" or omit it as appropriate. Ensure the output is tailored to support generating stakeholder reports.
-
-    Include the word "json" in your response to enable JSON mode.
-
+    You are an AI assistant processing job coach notes for disabled clients in a supported employment program. 
+    These notes detail a shift's who, what, where, when, and why for stakeholder reports (e.g., government, employers). 
+    Extract relevant entities dynamically (names, activities, locations, dates, purposes, etc.) from the text below. 
+    Return a concise, objective JSON object, using lists for multiple values and 'Unknown' for unclear details. 
+    Include 'json' for JSON mode.
     Text:
     {raw_text}
     """
@@ -108,7 +104,7 @@ def main(myblob: func.InputStream):
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,    # Low temperature for structured output
-            max_tokens=1000     # Increased to handle complex notes
+            max_tokens=10000    # Increased to handle complex notes
         )
         entities_json = response.choices[0].message.content.strip()
         entities = json.loads(entities_json)
