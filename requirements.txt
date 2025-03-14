@@ -12,3 +12,4 @@ azure-identity
 python-dotenv
 opentelemetry-api
 azure-monitor-opentelemetry
+openai
