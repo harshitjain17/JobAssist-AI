@@ -10,7 +10,7 @@ from pdf_creator import create_and_upload_pdf
 
 app = func.FunctionApp()
 
-@app.blob_trigger(arg_name="myblob", path="case-notes/arriving-files/{name}", connection="jobassistaistorage_STORAGE")
+@app.blob_trigger(arg_name="myblob", source="EventGrid", path="case-notes/arriving-files/{name}", connection="jobassistaistorage_STORAGE")
 def main(myblob: func.InputStream):
     """Process a blob trigger to generate and upload PDF reports."""
     logging.info(f"Blob trigger fired for: {myblob.name}")
