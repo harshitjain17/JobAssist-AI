@@ -8,30 +8,30 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from config import ASSET_PATH, get_logger
 
-from azure.ai.inference import ChatCompletionsClient, EmbeddingsClient
-
+import os
+from openai import AzureOpenAI
+from dotenv import load_dotenv
+load_dotenv()
 
 # initialize logging and tracing objects
 logger = get_logger(__name__)
 tracer = trace.get_tracer(__name__)
 
-# create a project client using environment variables loaded from the .env file
-project = AIProjectClient.from_connection_string(
-    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"], credential=DefaultAzureCredential()
+endpoint = os.getenv("OPENAI_SERVICE_URI")
+model_name = os.getenv("CHAT_MODEL")
+deployment = os.getenv("CHAT_MODEL")
+
+subscription_key = os.getenv("OPENAI_SERVICE_KEY")
+api_version = os.getenv("OPENAI_SERVICE_VERSION")
+
+client = AzureOpenAI(
+    api_version=api_version,
+    azure_endpoint=endpoint,
+    api_key=subscription_key,
 )
 
 
-chat = ChatCompletionsClient(
-    endpoint="https://jobassistai-open-ai-service.openai.azure.com/",
-    model_name="gpt-4o-mini",
-    credential=DefaultAzureCredential(),
-)
-embeddings = EmbeddingsClient(
-    endpoint="https://jobassistai-open-ai-service.openai.azure.com/",
-    model_name="text-embedding-ada-002",
-    credential=DefaultAzureCredential(),
-)
-
+client.embeddings.create()
 
 
 # use the project client to get the default search connection

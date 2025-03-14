@@ -16,6 +16,7 @@ client = AzureOpenAI(
     api_key=subscription_key,
 )
 
+
 response = client.chat.completions.create(
     messages=[
         {
@@ -30,7 +31,7 @@ response = client.chat.completions.create(
     max_tokens=4096,
     temperature=1.0,
     top_p=1.0,
-    model=deployment
+    model=deployment,
 )
 
 print(response.choices[0].message.content)

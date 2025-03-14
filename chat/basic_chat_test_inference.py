@@ -3,14 +3,19 @@ from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
+from dotenv import load_dotenv
+load_dotenv()
 
-endpoint = "https://jobassistai-open-ai-service.openai.azure.com/"
-model_name = "gpt-4o-mini"
+endpoint = os.getenv("OPENAI_SERVICE_URI")
+model_name = os.getenv("CHAT_MODEL")
+
+subscription_key = os.getenv("OPENAI_SERVICE_KEY")
+api_version = os.getenv("OPENAI_SERVICE_VERSION")
 
 client = ChatCompletionsClient(
     endpoint=endpoint,
     model_name=model_name,
-    credential=DefaultAzureCredential(),
+    credential=AzureKeyCredential(subscription_key),
 )
 
 response = client.complete(
