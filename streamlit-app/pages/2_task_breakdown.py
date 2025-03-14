@@ -1,25 +1,37 @@
 import streamlit as st
-# Placeholder imports
-# from azure.ai.textanalytics import TextAnalyticsClient
-# from azure.core.credentials import AzureKeyCredential
+import requests
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
+# Access FUNCTION_TASKBREAKDOWN_URL from .env
+FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
 
 st.title("Task Breakdown Tool")
 st.write("Enter a task and employee details for Azure AI-generated instructions.")
 
 # Input fields
 task = st.text_input("Task (e.g., 'Fold pizza boxes')")
-employee_info = st.text_area("Employee Profile (e.g., cognitive abilities, job role)")
+disability_type = st.text_input("Disability Type (e.g., 'Down Syndrome or Autism')")
+employee_info = st.text_area("Employee Profile (e.g., name, job role)")
 
 # Generate breakdown button
 if st.button("Generate Instructions"):
     if task and employee_info:
-        st.write("Processing with Azure AI...")
-        # Placeholder for Azure logic
-        # Example: Use Azure OpenAI or Cognitive Services to generate steps
-        # result = azure_openai_generate(f"Break down '{task}' for {employee_info}")
-        steps = ["1. Pick up a flat pizza box.", "2. Fold the left flap inward.", "3. Repeat for the right flap."]
-        st.markdown("### Instructions")
-        for step in steps:
-            st.write(step)
+        # Prepare the payload
+        payload = {"task": task, "disability_type": disability_type, "employee_info": employee_info}
+
+        with st.spinner("Processing with Azure AI...") as spinner:
+            # Make POST request to Azure Function
+            response = requests.post(FUNCTION_TASKBREAKDOWN_URL, json=payload)
+            
+            # Display the AI response
+            if response.status_code == 200:
+                st.success("Instructions generated successfully!")
+                st.success(response.json()['message'])
+            else:
+                st.error("Error: Could not get a response.")
     else:
         st.error("Please enter a task and employee profile.")
