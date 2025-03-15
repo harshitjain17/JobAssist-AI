@@ -10,10 +10,15 @@ load_dotenv()
 # Access FUNCTION_TASKBREAKDOWN_URL from .env
 FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
+FUNCTION_HTTP_TEXT_TO_SPEECH_URL = os.getenv("FUNCTION_HTTP_TEXT_TO_SPEECH_URL")
 
 def content():
     st.title("Task Breakdown Tool")
     st.write("Enter a task and employee details for Azure AI-generated instructions.")
+
+    # Placeholder for response message from Azure Open AI
+    if 'response_message' not in st.session_state:
+        st.session_state.response_message = None  # Initialize message in session
 
     # Input fields
     task = st.text_input("Task (e.g., 'Fold pizza boxes')")
@@ -34,11 +39,27 @@ def content():
                 
                 # Display the AI response
                 if response.status_code == 200:
-                    st.success("Instructions generated successfully!")
-                    st.success(response.json()['message'])
+                    st.session_state.response_message = response.json()['message']
                 else:
                     st.error("Error: Could not get a response.")
+                    st.session_state.response_message = None  # Clear message on failure
         else:
             st.error("Please enter a task and employee profile.")
+
+    # If response message is received, show Generate Audio button
+    if st.session_state.response_message:
+        col1, col2 = st.columns([4, 1]) 
+        with col1:
+                st.success(f"Instructions generated successfully!\n\n{st.session_state.response_message}")
+        with col2:
+            if st.button("🎵 🔊 Generate Audio"):
+                payload = {"text" : st.session_state.response_message}
+                with st.spinner(f"Processing with Azure Text to Speech Service...") as spinner:
+                    response = requests.post(FUNCTION_HTTP_TEXT_TO_SPEECH_URL, json=payload)
+                    if response.status_code == 200:
+                        audio_bytes = response.content  # Get the audio bytes
+                        st.audio(audio_bytes, format='audio/mpeg')  # Play audio in Streamlit
+                    else:
+                        st.error("Error: Failed to generate audio.")
 
 with_layout(content)
