@@ -66,5 +66,7 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)
+
+os.makedirs(".out", exist_ok=True)
 with open(".out/response__chat_with_resources.json", "w") as f:
     f.write(response.model_dump_json(indent=2))
