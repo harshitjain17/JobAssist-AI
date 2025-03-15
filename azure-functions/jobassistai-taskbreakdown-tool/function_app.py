@@ -3,13 +3,13 @@ import logging
 import json
 from openai import AzureOpenAI
 from clients import openai_client
-from config import OPENAI_DEPLOYMENT
+from config import OPENAI_DEPLOYMENT, system_prompt_mapping
 
 app = func.FunctionApp()
 
-@app.route(route="http_trigger")
-def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
+@app.route(route="http_trigger_openai")
+def http_trigger_openai(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Azure Open AI HTTP trigger function processed a request.')
 
     # Get the JSON data from the incoming request
     try:
@@ -17,23 +17,14 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     except ValueError:
         return func.HttpResponse("Invalid JSON", status_code=400)
     
-    task = req_body.get('task')
-    disability_type = req_body.get('disability_type')
-    employee_info = req_body.get('employee_info')
+    system_role = req_body.get('system_role')
+    user_prompt = req_body.get('user_prompt')
 
-    if task and employee_info:
-        # Create the prompt for OpenAI
-        system_prompt = f"""
-            You are a supportive AI assistant helping job coaches create notes for employee with disabilities in a supported employment program.
-            Be respectful, sensitive and never use stigmatizing language. 
-            Break down tasks into simple, numbered steps (Format: 1. [Step] 2. [Step]. 
-            Note to Job Coach (Optional). Additional training resources (Optional).
-            using clear, easy-to-understand language. 
-            Steps should be small, specific, and achievable, focusing on one action at a time.
-            Adjust instructions to fit the employee's disability and cognitive abilities.
-            """
-        
-        user_prompt = f"Task to complete : {task} \n Employee has disability : {disability_type} \n Employee Info {employee_info}"
+    if system_role and user_prompt:
+        # Prepare the system prompt based on the system role
+        system_prompt = system_prompt_mapping.get(system_role, "")
+
+        logging.info(f"Processing Open AI Request with System Role: {system_role}, System Prompt: {system_prompt}, User Prompt: {user_prompt}")
 
         # Call Azure OpenAI to get the response
         try:
@@ -47,17 +38,16 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
                 temperature=0.3,    # Low temperature for structured output
                 max_tokens=10000    # Increased to handle complex notes
             )
-            response_instructions = openai_response.choices[0].message.content.strip()
-            logging.info(f"Instructions for {task} about employee {employee_info}: {response_instructions}")
+            response_message = openai_response.choices[0].message.content.strip()
             return func.HttpResponse(
-                json.dumps({"message": response_instructions}),
+                json.dumps({"message": response_message}),
                 status_code=200,
                 mimetype="application/json")
             
         except Exception as e:
-            error_message = f"OpenAI processing failed: {str(e)}"
+            error_message = f"Azure OpenAI processing for system_prompt: {system_prompt} and user_prompt: {user_prompt} failed: {str(e)}"
             logging.error(error_message)
             return func.HttpResponse(f"{error_message}", status_code=400)
 
     else:
-        return func.HttpResponse("Please provide both task and employee name", status_code=400)
+        return func.HttpResponse("Please provide both system role and user prompt", status_code=400)

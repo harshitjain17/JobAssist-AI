@@ -9,6 +9,7 @@ load_dotenv()
 
 # Access FUNCTION_TASKBREAKDOWN_URL from .env
 FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
+SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
 
 def content():
     st.title("Task Breakdown Tool")
@@ -22,8 +23,10 @@ def content():
     # Generate breakdown button
     if st.button("Generate Instructions"):
         if task and employee_info:
+            user_prompt = f"Task to complete: {task}\n" + (f"Employee has disability: {disability_type}\n" if disability_type else "") + f"Employee Info: {employee_info}"
+
             # Prepare the payload
-            payload = {"task": task, "disability_type": disability_type, "employee_info": employee_info}
+            payload = {"system_role" : SYSTEM_ROLE_TASKBREAKDOWN, "user_prompt" : user_prompt}
 
             with st.spinner("Processing with Azure AI...") as spinner:
                 # Make POST request to Azure Function
