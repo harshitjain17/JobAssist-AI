@@ -1,11 +1,11 @@
 streamlit>=1.36.0
 PyPDF2>=3.0.1
 pandas
-azure-ai-textanalytics>=5.3.0  # For report generation and task breakdown
-azure-cosmos>=4.6.0           # For database (Cosmos DB)
-azure-storage-blob>=12.19.0   # For file storage
+azure-ai-textanalytics>=5.3.0   # For report generation and task breakdown
+azure-cosmos>=4.6.0             # For database (Cosmos DB)
+azure-storage-blob>=12.19.0     # For file storage
 azure-search-documents>=11.4.0  # For search in knowledge base
-azureml-core>=1.56.0          # For Azure Machine Learning
+azureml-core>=1.56.0            # For Azure Machine Learning
 azure-ai-projects
 azure-ai-inference[prompts]
 azure-identity
