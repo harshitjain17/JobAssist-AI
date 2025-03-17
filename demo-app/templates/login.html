@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Login - JobAssist AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="height: 80vh;">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <h1 class="h3 text-primary">
+                        <i class="fas fa-handshake me-2"></i>JobAssist AI
+                    </h1>
+                    <p class="text-muted">Sign in to access the case management system</p>
+                </div>
+                
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <div class="text-muted small mb-2">Demo Credentials:</div>
+                    <div class="text-muted small">Username: coach1 | Password: demo1234</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
