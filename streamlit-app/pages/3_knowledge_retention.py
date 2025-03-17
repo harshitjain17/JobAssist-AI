@@ -1,8 +1,19 @@
 import streamlit as st
 from utils import with_layout
+from datetime import date
+import requests
+import uuid
+from dotenv import load_dotenv
+import os
 # Placeholder imports
 # from azure.cosmos import CosmosClient
 # from azure.search.documents import SearchClient
+
+# Load environment variables
+load_dotenv()
+
+# Access FUNCTION_TASKBREAKDOWN_URL from .env
+FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
 
 def content():
     st.title("Knowledge Retention Tool")
@@ -34,12 +45,44 @@ def content():
 
     # Add new insight
     st.subheader("Add Insight")
-    new_key = st.text_input("Category (e.g., 'Employer Contact')")
-    new_value = st.text_area("Details")
-    if st.button("Save Insight"):
-        if new_key and new_value:
-            # Placeholder for save to Azure Cosmos DB
-            # container.upsert_item({"id": new_key, "details": new_value})
-            st.success(f"Added '{new_key}' to Azure Cosmos DB!")
+    # Capture fields
+    employee_name = st.text_input("Employee Name", placeholder="Enter employee name to track progress")
+    entry_date = st.date_input("Date", value=date.today())
+    workplace = st.text_input("Workplace/Environment", placeholder="Context of employment")
+    task_details = st.text_area("Task Details", placeholder="Describe the task being coached")
+    challenges_faced = st.text_area("Challenges Faced", placeholder="Describe challenges faced during task")
+    strategies_used = st.text_area("Strategies Used", placeholder="Describe strategies employed")
+    outcome = st.text_area("Outcome/Progress", placeholder="Result of coaching session")
+    future_recommendations = st.text_area("Future Recommendations", placeholder="Suggestions for next session")
+    tags_input = st.text_input("Tags (comma-separated)", placeholder="e.g., communication, retail, visual aids")
+
+    # Submit button
+    if st.button("Add Insights"):
+        if employee_name and task_details:
+            # Prepare JSON data
+            data = {
+                "id": str(uuid.uuid4()),  # Unique ID
+                "employeeName": employee_name,
+                "date": str(entry_date),
+                "workplace": workplace,
+                "taskDetails": task_details,
+                "challengesFaced": challenges_faced,
+                "strategiesUsed": strategies_used,
+                "outcome": outcome,
+                "futureRecommendations": future_recommendations,
+                "tags": [tag.strip() for tag in tags_input.split(",") if tag.strip()]
+            }
+
+            # Call Azure Function
+            try:
+                response = requests.post(FUNCTION_COSMOSDB_URL, json=data)
+                if response.status_code == 200:
+                    st.success("Insights saved successfully!")
+                else:
+                    st.error(f"Failed to save Insights. Status code: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+        else:
+            st.warning("Please fill out required fields: Employee Name and Task Details.")
 
 with_layout(content)
