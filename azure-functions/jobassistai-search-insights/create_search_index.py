@@ -29,14 +29,14 @@ index_payload = {
             "type": "Collection(Edm.Single)",
             "searchable": True,
             "dimensions": 1536,  # Example dimension for OpenAI embeddings
-            "vectorSearchConfiguration": "default"
+            "vectorSearchProfile": "default"
         }
     ],
     "vectorSearch": {
-        "algorithmConfigurations": [
+        "profiles": [
             {
                 "name": "default",
-                "kind": "hnsw",  # Vector search algorithm
+                "algorithm": "hnsw",  # Vector search algorithm
                 "hnswParameters": { "m": 4, "efConstruction": 400, "efSearch": 500 }
             }
         ]

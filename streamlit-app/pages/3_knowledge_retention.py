@@ -11,6 +11,8 @@ load_dotenv()
 # Access FUNCTION_TASKBREAKDOWN_URL from .env
 FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
+FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
+SYSTEM_ROLE_SEARCH_INSIGHTS = os.getenv("SYSTEM_ROLE_SEARCH_INSIGHTS")
 
 def content():
     st.title("Knowledge Retention Tool")
@@ -27,17 +29,30 @@ def content():
         try:
             response = requests.post(FUNCTION_SEARCH_INSIGHTS_URL, json=payload)
             if response.status_code == 200:
-                data = response.json
+                data = response.json()
                 search_results = data.get("search_results", [])
                 message = data.get("message", "")
 
                 # If results found
                 if search_results:
-                    st.success("Found relevant insights!")
-                    for result in search_results:
-                        st.markdown(f"**Category**: {result.get('category', 'N/A')}")
-                        st.markdown(f"**Details**: {result.get('details', 'N/A')}")
-                        st.markdown("---")  # Line separator between results
+                    category = search_results[0].get('category', '')
+                    details = search_results[0].get('details', '')
+                    if category and details:
+                        user_prompt = f"Search query: {search_query} got the results with category: {category} and details: {details}"
+
+                        # Prepare the payload
+                        payload = {"system_role" : SYSTEM_ROLE_SEARCH_INSIGHTS, "user_prompt" : user_prompt}
+
+                        with st.spinner("Processing with Azure AI...") as spinner:
+                            # Make POST request to Azure Function
+                            response = requests.post(FUNCTION_TASKBREAKDOWN_URL, json=payload)
+                            
+                            # Display the AI response
+                            if response.status_code == 200:
+                                response_message = response.json()['message']
+                                st.success(f"{response_message}")
+                            else:
+                                st.error("Error: Could not get a response from Azure Open AI.")
                 else:
                     # No relevant data found
                     st.warning(message or "No relevant data found.")

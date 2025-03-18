@@ -33,18 +33,19 @@ def search_insights(req: func.HttpRequest) -> func.HttpResponse:
                     "vector": {
                         "value": search_query_vector,
                         "fields": "detailsVector",
-                        "k": 5  # Return only the top 1 best match
+                        "k": 1  # Return only the top 1 best match
                     }
                 }
 
                 response = requests.post(AZURE_SEARCH_URL, json=payload, headers=azure_search_headers)
-                logging.info(f"Azure AI Search response: {response.json()}")
+                # logging.info(f"Azure AI Search response: {response.json()}")
                 results = response.json().get("value", [])
-                logging.info(f"Search results: {results}")
+                filtered_results = [{"category": item.get("category", ""), "details": item.get("details", "")} for item in results] if results else [{"category": "N/A", "details": "N/A"}]
+                logging.info(f"Search results: {filtered_results}")
                 message = "No relevant data found." if not results else "Success"
 
                 return func.HttpResponse(
-                    json.dumps({"search_results": results, "message": message}),
+                    json.dumps({"search_results": filtered_results, "message": message}),
                     status_code=200,
                     mimetype="application/json")
             except Exception as e:
