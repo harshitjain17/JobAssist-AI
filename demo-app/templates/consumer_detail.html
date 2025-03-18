@@ -3,6 +3,7 @@
 {% block title %}{{ consumer.name }} - JobAssist AI{% endblock %}
 
 {% block content %}
+<script type="text/javascript" src="https://js.live.net/v7.2/OneDrive.js"></script>
 <div class="container-fluid">
     <!-- Consumer Header Section -->
     <div class="row mb-4">
@@ -218,7 +219,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <form class="d-flex">
-                            <input type="text" class="form-control me-2" placeholder="Ask about this consumer...">
+                            <input type="text" class="form-control me-2" placeholder="` this consumer...">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -392,13 +393,128 @@
                         <label for="noteContent" class="form-label">Note Content</label>
                         <textarea class="form-control" id="noteContent" rows="5" required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Attachments</label>
+                        <div class="d-flex align-items-center">
+                            <button type="button" id="oneDrivePickerButton" class="btn btn-outline-primary me-2">
+                                <i class="fab fa-microsoft me-1"></i> Choose from OneDrive
+                            </button>
+                            <div id="selectedFiles" class="small text-muted"></div>
+                        </div>
+                        <div id="fileList" class="mt-2"></div>
+                    </div>
                 </form>
             </div>
+            
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    // OneDrive file picker configuration
+                    const oneDriveButton = document.getElementById('oneDrivePickerButton');
+                    const selectedFiles = document.getElementById('selectedFiles');
+                    const fileList = document.getElementById('fileList');
+                    
+                    // Your OneDrive app ID (you'll need to register an app with Microsoft)
+                    const odAppId = "5d23ccf1-9b1e-40f5-b75c-aa0767d8996b";
+                    
+                    oneDriveButton.addEventListener('click', function() {
+                        launchOneDrivePicker();
+                    });
+                    
+                    function launchOneDrivePicker() {
+                        const odOptions = {
+                            clientId: odAppId,
+                            action: "download",
+                            multiSelect: true,
+                            advanced: {
+                                filter: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+                            },
+                            success: function(files) {
+                                // Handle selected files
+                                console.log("Files selected:", files);
+                                displaySelectedFiles(files);
+                            },
+                            cancel: function() {
+                                console.log("File selection canceled");
+                            },
+                            error: function(error) {
+                                console.error("Error selecting files:", error);
+                            }
+                        };
+                        
+                        OneDrive.open(odOptions);
+                    }
+                    
+                    function displaySelectedFiles(response) {
+                        // Clear previous selections
+                        fileList.innerHTML = '';
+                        
+                        const files = response.value;
+                        selectedFiles.textContent = files.length + " file(s) selected";
+                        
+                        files.forEach(function(file) {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'border rounded p-2 mb-2 d-flex justify-content-between align-items-center';
+                            
+                            const fileInfo = document.createElement('div');
+                            fileInfo.innerHTML = `
+                                <i class="fas fa-file me-2"></i>
+                                <span>${file.name}</span>
+                                <small class="text-muted ms-2">${formatFileSize(file.size)}</small>
+                            `;
+                            
+                            const removeBtn = document.createElement('button');
+                            removeBtn.className = 'btn btn-sm btn-outline-danger';
+                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.onclick = function() {
+                                fileItem.remove();
+                                updateFileCount();
+                            };
+                            
+                            fileItem.appendChild(fileInfo);
+                            fileItem.appendChild(removeBtn);
+                            fileList.appendChild(fileItem);
+                        });
+                    }
+                    
+                    function updateFileCount() {
+                        const count = fileList.children.length;
+                        selectedFiles.textContent = count + " file(s) selected";
+                    }
+                    
+                    function formatFileSize(bytes) {
+                        if (bytes === 0) return '0 Bytes';
+                        const k = 1024;
+                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                    }
+                });
+            </script>
+<!--
+                <form>
+                    <div class="mb-3">
+                        <label for="noteCategory" class="form-label">Category</label>
+                        <select class="form-select" id="noteCategory" required>
+                            <option value="Progress">Progress</option>
+                            <option value="Job Lead">Job Lead</option>
+                            <option value="Job Offer">Job Offer</option>
+                            <option value="Concern">Concern</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Note Content</label>
+                        <textarea class="form-control" id="noteContent" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary">Save Note</button>
             </div>
         </div>
+        
     </div>
 </div>
 
