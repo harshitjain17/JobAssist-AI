@@ -2,11 +2,15 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import SearchIndex, SimpleField, SearchableField
+from dotenv import load_dotenv
+from os import getenv
 
 # Replace with your Azure details
-service_endpoint = "https://<your-search-service>.search.windows.net"
-api_key = "<your-api-key>"
-index_name = "example-index"
+load_dotenv()
+
+service_endpoint = getenv("AISEARCH_CONNECTION_URI")
+api_key = getenv("AISEARCH_CONNECTION_KEY")
+index_name = "test-index"
 
 # Create an index
 def create_index():
@@ -16,7 +20,8 @@ def create_index():
         SearchableField(name="content", type="Edm.String", analyzer_name="en.microsoft"),
     ]
     index = SearchIndex(name=index_name, fields=fields)
-    index_client.create_index(index)
+    index_client.create_or_update_index(index)
+    # index_client.create_index(index)
     print(f"Index '{index_name}' created.")
 
 # Add documents to the index
@@ -24,6 +29,8 @@ def add_documents(documents):
     search_client = SearchClient(endpoint=service_endpoint, index_name=index_name, credential=AzureKeyCredential(api_key))
     result = search_client.upload_documents(documents=documents)
     print(f"Documents added: {result}")
+    for r in result:
+        print(f"\tKey: {r.key}, Succeeded: {r.succeeded}, Error: {r.error_message}")
 
 # Query the index
 def query_index(search_text):
