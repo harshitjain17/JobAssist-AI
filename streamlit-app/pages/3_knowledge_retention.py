@@ -8,10 +8,10 @@ import os
 # Load environment variables
 load_dotenv()
 
-# Access FUNCTION_TASKBREAKDOWN_URL from .env
+# Access FUNCTION_HTTP_OPENAI_URL from .env
 FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
-FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
+FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
 SYSTEM_ROLE_SEARCH_INSIGHTS = os.getenv("SYSTEM_ROLE_SEARCH_INSIGHTS")
 
 def content():
@@ -45,7 +45,7 @@ def content():
 
                         with st.spinner("Processing with Azure AI...") as spinner:
                             # Make POST request to Azure Function
-                            response = requests.post(FUNCTION_TASKBREAKDOWN_URL, json=payload)
+                            response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload)
                             
                             # Display the AI response
                             if response.status_code == 200:

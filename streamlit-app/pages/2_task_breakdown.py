@@ -7,8 +7,8 @@ from utils import with_layout
 # Load environment variables
 load_dotenv()
 
-# Access FUNCTION_TASKBREAKDOWN_URL from .env
-FUNCTION_TASKBREAKDOWN_URL = os.getenv("FUNCTION_TASKBREAKDOWN_URL")
+# Access FUNCTION_HTTP_OPENAI_URL from .env
+FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
 FUNCTION_HTTP_TEXT_TO_SPEECH_URL = os.getenv("FUNCTION_HTTP_TEXT_TO_SPEECH_URL")
 
@@ -35,7 +35,7 @@ def content():
 
             with st.spinner("Processing with Azure AI...") as spinner:
                 # Make POST request to Azure Function
-                response = requests.post(FUNCTION_TASKBREAKDOWN_URL, json=payload)
+                response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload)
                 
                 # Display the AI response
                 if response.status_code == 200:
