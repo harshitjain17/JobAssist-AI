@@ -1,6 +1,8 @@
 // Main JavaScript for JobAssist AI demo application
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('script.js loaded'); // Debug statement
+    
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -277,5 +279,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 1500);
             }
         });
+    }
+    
+    // Don't reinitialize the chat functionality if it's implemented inline
+    // in dashboard.html. Let's make sure we're not causing a conflict.
+    const aiChatFormInScript = document.getElementById('aiChatForm');
+    if (aiChatFormInScript && !window.chatInitialized) {
+        console.log('Initializing chat from script.js - this could cause conflicts');
+        // Implementation would go here but we'll skip it to avoid conflicts
     }
 });

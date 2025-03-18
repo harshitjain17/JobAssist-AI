@@ -3,6 +3,11 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 import os
 from datetime import datetime, timedelta
 import json
+import sys
+
+# Add the parent directory to sys.path to import from chat package
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from chat.chat import create_chat_completion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hackathon-demo-secret-key'
@@ -113,6 +118,54 @@ def ai_task_breakdown():
             'Consider using a folding jig for consistency'
         ]
     })
+
+# Add this new route for the AI chat functionality
+@app.route('/api/chat', methods=['POST'])
+@login_required
+def chat():
+    try:
+        data = request.json
+        user_content = data.get('user_content')
+        
+        if not user_content:
+            return jsonify({
+                'error': 'No content provided',
+                'response': 'Please provide a question or message.'
+            }), 400
+        
+        # For debugging, let's log the request
+        print(f"Chat request received: {user_content}")
+        
+        # Add a user_context parameter to request simple HTML formatting
+        user_context = {
+            "response_format": "simple_html"
+        }
+        
+        # Get the response from the OpenAI API with the formatting context
+        response = create_chat_completion(
+            user_content=user_content,
+            user_context=user_context
+        )
+        
+        # Extract the assistant's message
+        if response and hasattr(response, 'choices') and len(response.choices) > 0:
+            ai_response = response.choices[0].message.content
+        else:
+            ai_response = "Sorry, I couldn't process your request. Please try again."
+        
+        # For debugging, let's log the response
+        print(f"Chat response sent: {ai_response[:100]}...")
+        
+        return jsonify({
+            'response': ai_response
+        })
+    except Exception as e:
+        print(f"Error in chat endpoint: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'response': "Sorry, an error occurred while processing your request."
+        }), 500
+
 # User class for Flask-Login
 class UserObject:
     def __init__(self, user_dict):

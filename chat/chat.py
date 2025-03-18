@@ -53,6 +53,8 @@ def create_chat_completion(
     ):
     
     user_prompt = ""
+    # If user_context is provided, it can include formatting preferences
+    # such as {"response_format": "simple_html"} to get HTML formatted responses
     if user_context:
         user_prompt = f"{json.dumps(user_context)}\n"
     if user_content:
@@ -116,7 +118,11 @@ if __name__ == "__main__":
             "timestamp": datetime.now().isoformat()
         },
     }
+    format_context = {
+        "response_type": "simple_html"
+    }
 
     # response = create_chat_completion(system_prompt=system_prompt, user_content=user_content)
-    response = create_chat_completion(system_prompt=system_prompt, user_context=user_context)
+    # response = create_chat_completion(system_prompt=system_prompt, user_context=user_context)
+    response = create_chat_completion(system_prompt=system_prompt, user_content=user_content, user_context=format_context)
     print(response.choices[0].message.content)
