@@ -6,8 +6,8 @@ from config import TEXT_EMBEDDING_MODEL
 
 app = func.FunctionApp()
 
-@app.route(route="http_trigger_cosmos")
-def http_trigger_cosmos(req: func.HttpRequest) -> func.HttpResponse:
+@app.route(route="save_insights")
+def save_insights(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
     # Get the JSON data from the incoming request

@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 # Access FUNCTION_HTTP_OPENAI_URL from .env
-FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
+FUNCTION_SAVE_INSIGHTS_URL = os.getenv("FUNCTION_SAVE_INSIGHTS_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
 FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
 SYSTEM_ROLE_SEARCH_INSIGHTS = os.getenv("SYSTEM_ROLE_SEARCH_INSIGHTS")
@@ -79,7 +79,7 @@ def content():
 
             # Call Azure Function
             try:
-                response = requests.post(FUNCTION_COSMOSDB_URL, json=payload)
+                response = requests.post(FUNCTION_SAVE_INSIGHTS_URL, json=payload)
                 if response.status_code == 200:
                     st.success("Insights saved successfully!")
                 else:

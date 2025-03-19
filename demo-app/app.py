@@ -20,7 +20,7 @@ BLOB_CONTAINER_NAME = "case-notes"
 
 # Azure Function configuration
 FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
-FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
+FUNCTION_SAVE_INSIGHTS_URL = os.getenv("FUNCTION_SAVE_INSIGHTS_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
 
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
@@ -383,7 +383,7 @@ def save_knowledge_base():
 
             # Call Azure Function
             try:
-                response = requests.post(FUNCTION_COSMOSDB_URL, json=payload)
+                response = requests.post(FUNCTION_SAVE_INSIGHTS_URL, json=payload)
                 if response.status_code == 200:
                     return jsonify({
                             'response': 'Insight saved successfully.'
