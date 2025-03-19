@@ -137,50 +137,97 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveTaskBtn = document.getElementById('saveTaskBreakdown');
     
     if (generateTaskBtn) {
-        generateTaskBtn.addEventListener('click', function() {
+        generateTaskBtn.addEventListener('click', async function() {
+            const taskName = document.getElementById('taskName').value;
+            const taskDetails = document.getElementById('taskDetails').value;
+            const needsVisual = document.getElementById('needsVisual').checked;
+            const needsSimplified = document.getElementById('needsSimplified').checked;
+
+            if (!taskName || !taskDetails) {
+                alert('Please enter a task name and details.');
+                return;
+            }
+
             // Show loading indicator
             taskStepsList.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Generating task breakdown...</p></div>';
+            taskAccommodationsList.innerHTML = '';
             taskResultDiv.classList.remove('d-none');
-            
-            // Simulate API call to the backend
-            setTimeout(function() {
-                // In a real implementation, this would be fetch('/ai/task-breakdown', {...})
-                
-                // Mock response
-                const steps = [
-                    'Open the pizza box flat on a clean surface',
-                    'Identify the fold lines on the box',
-                    'Fold the side panels inward along the fold lines',
-                    'Fold the bottom panel up',
-                    'Fold the top panel down and tuck the tab into the slot'
-                ];
-                
-                const accommodations = [
-                    'Use visual markers on fold lines for better visibility',
-                    'Place a weighted object to hold the box while folding',
-                    'Consider using a folding jig for consistency'
-                ];
-                
-                // Populate the lists
-                taskStepsList.innerHTML = '';
-                steps.forEach(step => {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.textContent = step;
-                    taskStepsList.appendChild(li);
+            generateTaskBtn.disabled = true;
+
+            try {
+                const response = await fetch('/ai/task-breakdown', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        task_name: taskName,
+                        task_details: taskDetails,
+                        accommodations: {
+                            needsVisual: needsVisual,
+                            needsSimplified: needsSimplified
+                        },
+                        consumer_id: window.consumerId || 'c001' // Fallback to 'c001' if not set
+                    })
                 });
-                
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Populate the steps list
+                    taskStepsList.innerHTML = '';
+                    result.steps.forEach(step => {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.textContent = step;
+                        taskStepsList.appendChild(li);
+                    });
+
+                    // Populate the accommodations list
+                    taskAccommodationsList.innerHTML = '';
+                    result.accommodations.forEach(accommodation => {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.textContent = accommodation;
+                        taskAccommodationsList.appendChild(li);
+                    });
+
+                    // Show the save button
+                    saveTaskBtn.classList.remove('d-none');
+                } else {
+                    taskStepsList.innerHTML = `<p class="text-danger">Error: ${result.error}</p>`;
+                    taskAccommodationsList.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Task breakdown error:', error);
+                taskStepsList.innerHTML = '<p class="text-danger">An error occurred while generating the breakdown.</p>';
                 taskAccommodationsList.innerHTML = '';
-                accommodations.forEach(accommodation => {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.textContent = accommodation;
-                    taskAccommodationsList.appendChild(li);
+            } finally {
+                generateTaskBtn.disabled = false;
+            }
+        });
+
+        saveTaskBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch('/upload_note', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        category: 'Task Breakdown',
+                        content: `Task: ${document.getElementById('taskName').value}\nSteps:\n${Array.from(taskStepsList.children).map(li => li.textContent).join('\n')}\nAccommodations:\n${Array.from(taskAccommodationsList.children).map(li => li.textContent).join('\n')}`,
+                        consumer_id: window.consumerId || 'c001'
+                    })
                 });
-                
-                // Show the save button
-                saveTaskBtn.classList.remove('d-none');
-            }, 1500);
+
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('taskBreakdownModal'));
+                    modal.hide();
+                    alert('Task breakdown saved to consumer profile.');
+                } else {
+                    alert('Error saving task breakdown.');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('An error occurred while saving.');
+            }
         });
     }
     
