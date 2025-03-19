@@ -3,7 +3,7 @@ import logging
 import requests
 import json
 from clients import openai_client, AZURE_SEARCH_URL, azure_search_headers
-from config import TEXT_EMBEDDING_MODEL
+from config import TEXT_EMBEDDING_MODEL, SYSTEM_ROLE_SEARCH_INSIGHTS, FUNCTION_HTTP_OPENAI_URL
 
 app = func.FunctionApp()
 
@@ -40,14 +40,26 @@ def search_insights(req: func.HttpRequest) -> func.HttpResponse:
                 response = requests.post(AZURE_SEARCH_URL, json=payload, headers=azure_search_headers)
                 # logging.info(f"Azure AI Search response: {response.json()}")
                 results = response.json().get("value", [])
-                filtered_results = [{"category": item.get("category", ""), "details": item.get("details", "")} for item in results] if results else [{"category": "N/A", "details": "N/A"}]
-                logging.info(f"Search results: {filtered_results}")
-                message = "No relevant data found." if not results else "Success"
+                # filtered_results = [{"category": item.get("category", ""), "details": item.get("details", "")} for item in results] if results else [{"category": "", "details": ""}]
+                category, details = (zip(*[(item.get("category", ""), item.get("details", "")) for item in results]) if results else ([""], [""]))
+                logging.info(f"Search results: {category}, {details}")
 
-                return func.HttpResponse(
-                    json.dumps({"search_results": filtered_results, "message": message}),
-                    status_code=200,
-                    mimetype="application/json")
+                if category and details:
+                    user_prompt = f"Search query: {search_query} got the results with category: {category} and details: {details}"
+
+                    # Prepare the payload
+                    payload = {"system_role" : SYSTEM_ROLE_SEARCH_INSIGHTS, "user_prompt" : user_prompt}
+                    response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload)
+                            
+                    # Display the AI response
+                    if response.status_code == 200:
+                        response_message = response.json()['message']
+                        return func.HttpResponse(
+                            json.dumps({"message": response_message}),
+                            status_code=200,
+                            mimetype="application/json")
+                    else:
+                        return func.HttpResponse(f"Search Insight - Azure OpenAI Error: {str(e)}", status_code=500)
             except Exception as e:
                 return func.HttpResponse(f"Search Insight - Azure AI Search Error: {str(e)}", status_code=500)
         

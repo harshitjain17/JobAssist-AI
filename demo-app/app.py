@@ -24,7 +24,6 @@ FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
 
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
-SYSTEM_ROLE_SEARCH_INSIGHTS = os.getenv("SYSTEM_ROLE_SEARCH_INSIGHTS")
 
 # Initialize Blob Service Client
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
@@ -352,43 +351,15 @@ def search_knowledge_base():
 
         response = requests.post(FUNCTION_SEARCH_INSIGHTS_URL, json=payload)
         if response.status_code == 200:
-            data = response.json()
-            search_results = data.get("search_results", [])
-            message = data.get("message", "")
-
-            # If results found
-            if search_results:
-                category = search_results[0].get('category', '')
-                details = search_results[0].get('details', '')
-                if category and details:
-                    user_prompt = f"Search query: {search_query} got the results with category: {category} and details: {details}"
-
-                    # Prepare the payload
-                    payload = {"system_role" : SYSTEM_ROLE_SEARCH_INSIGHTS, "user_prompt" : user_prompt}
-                    # Make POST request to Azure Function
-                    response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload)
-                    
-                    # Display the AI response
-                    if response.status_code == 200:
-                        response_message = response.json()['message']
-                        return jsonify({
-                            'response': response_message
-                        })
-                    else:
-                        return jsonify({
-                            'error': str(e),
-                            'response': "Sorry, an error occurred while processing your request with Azure OpenAI."
-                        }), 500
-            else:
-                # No relevant data found
-                return jsonify({
-                            'response': "No relevant data found."
-                        })
+            response_message = response.json()['message']
+            return jsonify({
+                'response': response_message
+            })
         else:
             return jsonify({
-                        'error': str(e),
-                        'response': "Sorry, an error occurred while processing your request with Azure AI Search."
-                    }), 500
+                'error': str(e),
+                'response': "Sorry, an error occurred while processing your request with Azure OpenAI."
+            }), 500
     except Exception as e:
         print(f"Error in search insights endpoint: {str(e)}")
         return jsonify({
