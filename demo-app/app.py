@@ -20,7 +20,11 @@ BLOB_CONTAINER_NAME = "case-notes"
 
 # Azure Function configuration
 FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
+FUNCTION_COSMOSDB_URL = os.getenv("FUNCTION_COSMOSDB_URL")
+FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
+
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
+SYSTEM_ROLE_SEARCH_INSIGHTS = os.getenv("SYSTEM_ROLE_SEARCH_INSIGHTS")
 
 # Initialize Blob Service Client
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
@@ -327,6 +331,114 @@ def chat():
             'error': str(e),
             'response': "Sorry, an error occurred while processing your request."
         }), 500
+
+@app.route('/api/search-knowledge-base', methods=['POST'])
+@login_required
+def search_knowledge_base():
+    try:
+        data = request.json
+        search_query = data.get('search_query')
+        if not search_query:
+            return jsonify({
+                'error': 'No search query provided',
+                'response': 'Please provide a question or message.'
+            }), 400
+        
+        # For debugging, let's log the request
+        print(f"Search query received: {search_query}")
+
+         # Prepare JSON payload
+        payload = {"search_query": search_query}
+
+        response = requests.post(FUNCTION_SEARCH_INSIGHTS_URL, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            search_results = data.get("search_results", [])
+            message = data.get("message", "")
+
+            # If results found
+            if search_results:
+                category = search_results[0].get('category', '')
+                details = search_results[0].get('details', '')
+                if category and details:
+                    user_prompt = f"Search query: {search_query} got the results with category: {category} and details: {details}"
+
+                    # Prepare the payload
+                    payload = {"system_role" : SYSTEM_ROLE_SEARCH_INSIGHTS, "user_prompt" : user_prompt}
+                    # Make POST request to Azure Function
+                    response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload)
+                    
+                    # Display the AI response
+                    if response.status_code == 200:
+                        response_message = response.json()['message']
+                        return jsonify({
+                            'response': response_message
+                        })
+                    else:
+                        return jsonify({
+                            'error': str(e),
+                            'response': "Sorry, an error occurred while processing your request with Azure OpenAI."
+                        }), 500
+            else:
+                # No relevant data found
+                return jsonify({
+                            'response': "No relevant data found."
+                        })
+        else:
+            return jsonify({
+                        'error': str(e),
+                        'response': "Sorry, an error occurred while processing your request with Azure AI Search."
+                    }), 500
+    except Exception as e:
+        print(f"Error in search insights endpoint: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'response': "Sorry, an error occurred while processing your request."
+        }), 500
+
+@app.route('/api/save-knowledge-base', methods=['POST'])
+@login_required
+def save_knowledge_base():
+    try:
+        data = request.json
+        category = data.get('category')
+        details = data.get('details')
+        if category and details:
+            # Prepare JSON payload
+            payload = {
+                "category": category,
+                "details": details
+            }
+
+            # Call Azure Function
+            try:
+                response = requests.post(FUNCTION_COSMOSDB_URL, json=payload)
+                if response.status_code == 200:
+                    return jsonify({
+                            'response': 'Insight saved successfully.'
+                        })
+                else:
+                    return jsonify({
+                        'error': str(e),
+                        'response': "Error occured while saving insight."
+                    }), 500
+            except Exception as e:
+                return jsonify({
+                        'error': str(e),
+                        'response': "Error occured while saving insight - unable to process request."
+                    }), 500
+        else:
+            return jsonify({
+                'error': 'Category/Details not provided',
+                'response': 'Please provide both category and details.'
+            }), 400
+    except Exception as e:
+        print(f"Error in save insights endpoint: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'response': "Error occured while processing save insight request."
+        }), 500
+
 
 # User class for Flask-Login
 class UserObject:

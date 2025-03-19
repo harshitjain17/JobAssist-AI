@@ -335,4 +335,115 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Initializing chat from script.js - this could cause conflicts');
         // Implementation would go here but we'll skip it to avoid conflicts
     }
+
+    // Add functionality to the Knowledge Base form
+    const aiKnowledgeBaseForm = document.getElementById('aiKnowledgeBaseForm');
+    if (aiKnowledgeBaseForm) {
+        aiKnowledgeBaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = this.querySelector('input');
+            const message = input.value.trim();
+            
+            if (message) {
+                // Add user message to chat
+                addMessage('user', message);
+                
+                // Clear input
+                input.value = '';
+                
+                // Show typing indicator
+                const chatContainer = document.querySelector('.chat-container');
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'chat-message ai-message mb-3 typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="d-flex">
+                        <div class="avatar-circle bg-primary text-white me-2">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content p-3 bg-white rounded">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.appendChild(typingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Simulate AI response (for demo)
+                setTimeout(() => {
+                    // Remove typing indicator
+                    chatContainer.removeChild(typingDiv);
+                    
+                    // Add AI response
+                    simulateAIResponse(message);
+                }, 1500);
+            }
+        });
+    }
+    // Don't reinitialize the chat functionality if it's implemented inline
+    // in dashboard.html. Let's make sure we're not causing a conflict.
+    const aiKnowledgeBaseFormInScript = document.getElementById('aiKnowledgeBaseForm');
+    if (aiKnowledgeBaseFormInScript && !window.chatInitialized) {
+        console.log('Initializing chat from script.js - this could cause conflicts');
+        // Implementation would go here but we'll skip it to avoid conflicts
+    }
+
+    // Helper function to add message to chat
+function addMessage(sender, content) {
+    const knowledgeBaseContainer = document.querySelector('#knowledgeBaseContainer');
+    if (!knowledgeBaseContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${sender}-message mb-3`;
+    
+    if (sender === 'user') {
+        messageDiv.innerHTML = `
+            <div class="d-flex justify-content-end">
+                <div class="message-content p-3 bg-primary text-white rounded">
+                    <p class="mb-0">${content}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="d-flex">
+                <div class="avatar-circle bg-primary text-white me-2">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content p-3 bg-white rounded">
+                    <p class="mb-0">${content}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Simulate AI response (for demo)
+function simulateAIResponse(userMessage) {
+    let response = "I'm sorry, I don't have enough information to help with that.";
+    
+    // Simple pattern matching for demo
+    userMessage = userMessage.toLowerCase();
+    
+    if (userMessage.includes('job') && userMessage.includes('match')) {
+        response = "Based on James Wilson's profile, I've found 3 potential job matches:<br><br>1. Data Entry Specialist at Acme Corp (85% match)<br>2. Administrative Assistant at TechSolutions (78% match)<br>3. Customer Service Rep at GlobalSupport (72% match)<br><br>Would you like more details on any of these positions?";
+    }
+    else if (userMessage.includes('appointment') || userMessage.includes('meeting')) {
+        response = "You have a Resume Review appointment with James Wilson tomorrow at 10:00 AM. Based on his profile, I suggest focusing on highlighting his data entry skills and customer service experience. Would you like me to prepare some tailored resume suggestions?";
+    }
+    else if (userMessage.includes('market') || userMessage.includes('trend')) {
+        response = "Current job market trends show increased demand for remote data entry positions (+15% YOY). Companies like Acme Corp and DataPro have recently posted positions with accommodations for mobility challenges. This aligns well with James Wilson's skill set and needs.";
+    }
+    else if (userMessage.includes('hello') || userMessage.includes('hi')) {
+        response = "Hello! I'm JobAssist AI. I can help you find job matches for consumers, prepare for appointments, analyze job market trends, and more. How can I assist you today?";
+    }
+    
+    addMessage('ai', response);
+}
 });

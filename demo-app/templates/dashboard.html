@@ -15,6 +15,9 @@
                             <p class="mb-0">{{ now.strftime('%A, %B %d, %Y') }}</p>
                         </div>
                         <div class="text-end">
+                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#knowledgeBaseModal">
+                                <i class="fas fa-robot me-2"></i>Knowledge Base
+                            </button>
                             <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#aiAssistantModal">
                                 <i class="fas fa-robot me-2"></i>Ask AI Assistant
                             </button>
@@ -352,6 +355,101 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Knowledge Base Modal -->
+<div class="modal fade" id="knowledgeBaseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-robot me-2"></i>Job Coach Knowledge Base</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="knowledgeBaseContainer" class="chat-container p-3 bg-light rounded" style="height: 300px; overflow-y: auto;">
+                    <div class="chat-message ai-message mb-3">
+                        <div class="d-flex">
+                            <div class="avatar-circle bg-primary text-white me-2">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content p-3 bg-white rounded">
+                                <p class="mb-0">Welcome to the Knowledge Base – a place where job coaches save their insights so AI can assist new coaches in finding the right information when needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chat messages will be added here dynamically -->
+                </div>
+                <div class="mt-3">
+                    <form id="knowledgeBaseForm" class="d-flex">
+                        <!-- Plus button to open the Offcanvas panel -->
+                        <button type="button" class="btn btn-primary me-2" id="toggleAddInsight">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <input type="text" id="searchQuery" class="form-control me-2" placeholder="Ask a question...">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <div class="mt-2 small text-muted">
+                        <strong>Suggested:</strong> 
+                        <a href="#" class="suggestion text-decoration-none">Find workplace accommodations</a> • 
+                        <a href="#" class="suggestion text-decoration-none">Retrieve Contact Information</a> • 
+                        <a href="#" class="suggestion text-decoration-none">Learn from past cases</a>
+                    </div>
+                    <!-- Add Insight Form (Hidden Initially) -->
+                    <div id="addInsightFormContainer" class="mt-3 p-3 border rounded bg-white shadow-sm d-none">
+                        <h6 class="mb-3"><i class="fas fa-lightbulb me-2"></i> Add Insight</h6>
+                        <form id="addInsightForm">
+                            <div id="addInsightSuccessMessage" class="alert alert-success d-none" role="alert">
+                                Insight added successfully! You can add more or close this form.
+                            </div>
+                            <div id="addInsightErrorMessage" class="alert alert-danger d-none" role="alert">
+                                Error while saving insight. Please try again.
+                            </div>
+                            <div class="mb-2">
+                                <label for="category" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="category" required>
+                            </div>
+                            <div class="mb-2">
+                                <label for="details" class="form-label">Details</label>
+                                <textarea class="form-control" id="details" rows="3" required></textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Save Insight</button>
+                                <button type="button" class="btn btn-outline-secondary" id="cancelAddInsight">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- End of Add Insight form -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offcanvas Panel: Add Insight -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="addInsightOffcanvas" aria-labelledby="addInsightOffcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="addInsightOffcanvasLabel">
+            <i class="fas fa-lightbulb me-2"></i> Add Insight
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form id="addInsightForm">
+            <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <input type="text" class="form-control" id="category" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="details" class="form-label">Details</label>
+                <textarea class="form-control" id="details" rows="3" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Insight</button>
+        </form>
     </div>
 </div>
 {% endblock %}
