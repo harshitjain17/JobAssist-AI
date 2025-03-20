@@ -20,10 +20,12 @@ BLOB_CONTAINER_NAME = "case-notes"
 
 # Azure Function configuration
 FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
+FUNCTION_HTTP_OPENAI_WITH_INDEX_URL = os.getenv("FUNCTION_HTTP_OPENAI_WITH_INDEX_URL")
 FUNCTION_SAVE_INSIGHTS_URL = os.getenv("FUNCTION_SAVE_INSIGHTS_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
 
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
+SYSTEM_ROLE_CHAT = os.getenv("SYSTEM_ROLE_CHAT","chat")
 
 # Initialize Blob Service Client
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
@@ -291,6 +293,12 @@ def chat():
     try:
         data = request.json
         user_content = data.get('user_content')
+        user_context = data.get('user_context')
+        # Add a user_context parameter to request simple HTML formatting
+        if not user_context:
+            user_context = {
+                "response_format": "simple_html"
+            }
         
         if not user_content:
             return jsonify({
@@ -301,31 +309,56 @@ def chat():
         # For debugging, let's log the request
         print(f"Chat request received: {user_content}")
         
-        # Add a user_context parameter to request simple HTML formatting
-        user_context = {
-            "response_format": "simple_html"
+        user_prompt = ""
+        if user_context:
+            user_prompt = f"{json.dumps(user_context)}\n"
+        if user_content:
+            user_prompt += user_content
+
+        # Prepare payload for Azure Function
+        payload = {
+            "system_role": SYSTEM_ROLE_CHAT,
+            "user_prompt": user_prompt
         }
+
+        # Call Azure Function
+        response = requests.post(FUNCTION_HTTP_OPENAI_WITH_INDEX_URL, json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            message = result.get('message', '')
+            citations = result.get('citations', '')
+            return jsonify({
+                'response': message,
+                'citations': citations
+            })
+        else:
+            return jsonify({'error': f"Failed to generate chat_with_index response: {response.text}"}), 500
+
+    except Exception as e:
+        print(f"Error in task breakdown: {str(e)}")
+        return jsonify({'error': str(e)}), 500        
         
         # print(user_context)
         # print(user_content)
         # Get the response from the OpenAI API with the formatting context
-        response = create_chat_completion(
-            user_content=user_content,
-            user_context=user_context
-        )
+        # response = create_chat_completion(
+        #     user_content=user_content,
+        #     user_context=user_context
+        # )
         
-        # Extract the assistant's message
-        if response and hasattr(response, 'choices') and len(response.choices) > 0:
-            ai_response = response.choices[0].message.content
-        else:
-            ai_response = "Sorry, I couldn't process your request. Please try again."
+        # # Extract the assistant's message
+        # if response and hasattr(response, 'choices') and len(response.choices) > 0:
+        #     ai_response = response.choices[0].message.content
+        # else:
+        #     ai_response = "Sorry, I couldn't process your request. Please try again."
         
-        # For debugging, let's log the response
-        print(f"Chat response sent: {ai_response[:100]}...")
+        # # For debugging, let's log the response
+        # print(f"Chat response sent: {ai_response[:100]}...")
         
-        return jsonify({
-            'response': ai_response
-        })
+        # return jsonify({
+        #     'response': ai_response
+        # })
     except Exception as e:
         print(f"Error in chat endpoint: {str(e)}")
         return jsonify({
