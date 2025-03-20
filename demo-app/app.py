@@ -445,6 +445,36 @@ def save_knowledge_base():
             'response': "Error occured while processing save insight request."
         }), 500
 
+@app.route('/api/upload-voice-insights', methods=['POST'])
+@login_required
+def upload_audio():
+    try:
+        file = request.files.get('file')        
+        if not file:
+            return jsonify({'success': False, 'error': 'No file provided'}), 400
+
+        # Validate file type
+        allowed_extensions = {'.wav', '.mp3', '.ogg', '.flac'}
+        filename = file.filename.lower()
+        if not any(filename.endswith(ext) for ext in allowed_extensions):
+            return jsonify({'success': False, 'error': 'Invalid file type. Please upload WAV, MP3, OGG, or FLAC files'}), 400
+
+        # Generate unique note_id
+        note_id = f"audio_{int(time.time())}"
+        blob_path = f"audio-files/{note_id}_{file.filename}"
+        blob_client = blob_service_client.get_blob_client(container="voice-insights", blob=blob_path)
+        
+        # Upload file to Azure Blob Storage
+        blob_client.upload_blob(file, overwrite=True)
+
+        # Return the blob path along with success
+        return jsonify({
+            'success': True,
+            'blob_path': blob_path
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 # User class for Flask-Login
 class UserObject:

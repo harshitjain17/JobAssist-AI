@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const knowledgeBaseForm = document.getElementById('knowledgeBaseForm');
     const searchQuery = document.getElementById('searchQuery');
     const knowledgeBaseContainer = document.getElementById('knowledgeBaseContainer');
+    const audioUpload = document.getElementById('audioUpload');
+    const successMessage = document.getElementById('addInsightSuccessMessage');
+    const errorMessage = document.getElementById('addInsightErrorMessage');
     
     if (!knowledgeBaseForm || !searchQuery || !knowledgeBaseContainer) {
         console.log('Knowledge Base UI not found on this page, skipping initialization');
@@ -210,4 +213,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
     });
+
+    audioUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Create FormData object to send file
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Show uploading status
+        showMessage(successMessage, 'Uploading audio file...');
+
+        // Make API call to upload audio
+        fetch('/api/upload-voice-insights', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(successMessage, 'Audio uploaded successfully!');
+                audioUpload.dataset.blobPath = data.blob_path;
+            } else {
+                showMessage(errorMessage, data.error || 'Upload failed');
+            }
+        })
+        .catch(error => {
+            showMessage(errorMessage, 'Error uploading audio: ' + error.message);
+        });
+    });
+
+    // Helper function to show messages
+    function showMessage(element, message) {
+        // Hide both messages first
+        successMessage.classList.add('d-none');
+        errorMessage.classList.add('d-none');
+        
+        // Show the specified message
+        element.textContent = message;
+        element.classList.remove('d-none');
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            element.classList.add('d-none');
+        }, 5000);
+    }
 });

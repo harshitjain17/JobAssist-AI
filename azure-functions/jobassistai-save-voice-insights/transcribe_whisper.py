@@ -13,12 +13,12 @@ load_dotenv()
 
 def download_blob_to_temp(blob_name):
     """Download a blob to a temporary file and return the file path."""
-    
+
     if not AZURE_STORAGE_CONNECTION_STRING or not AZURE_STORAGE_CONTAINER_NAME:
         raise ValueError("Azure Storage connection string and container name must be set in .env file")
-    
+
     # Create a blob service client
-    blob_client = container_client.get_blob_client(blob_name)
+    blob_client = blob_service_client.get_blob_client(container=AZURE_STORAGE_CONTAINER_NAME, blob=blob_name)
     
     # Create a temporary file
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(blob_name)[1])
@@ -62,10 +62,10 @@ def transcribe_with_whisper(file_path):
         print(f"Error during transcription: {str(e)}")
         raise
 
-def upload_blob_from_file(transcript, blob_path):
+def upload_blob_from_file(transcript, blob_name):
     # Save transcript to file
     # Create a temporary file
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(myblob.name)[1])
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(blob_name)[1])
     temp_file_path = temp_file.name
     temp_file.close()
 
@@ -73,8 +73,12 @@ def upload_blob_from_file(transcript, blob_path):
         file.write(transcript)
     print(f"\nTranscript saved to {temp_file_path}")
     
-    """Upload a file to Azure Blob Storage"""
-    
+    # Clean up the blob_name by removing '.mp3' if present and set the path to 'transcriptions/'
+    base_name = blob_name.replace(".mp3", "")
+    base_name = blob_name.replace("audio-files/", "")
+    blob_path = f"transcriptions/{base_name}.txt"
+
+    # Upload to Azure Blob Storage
     blob_client = blob_service_client.get_blob_client(container=AZURE_STORAGE_CONTAINER_NAME, blob=blob_path)
     
     with open(temp_file_path, "rb") as data:
