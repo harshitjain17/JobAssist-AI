@@ -132,12 +132,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Task Breakdown Generator
     const generateTaskBtn = document.getElementById('generateTaskBreakdown');
     const taskResultDiv = document.getElementById('taskBreakdownResult');
+    const loadingSpinner = document.getElementById("loadingSpinner");
     const taskStepsList = document.getElementById('taskSteps');
-    const taskAccommodationsList = document.getElementById('taskAccommodations');
+    const taskNoteToJobCoachList = document.getElementById('taskNoteToJobCoach');
+    const taskAdditionalResourcesList = document.getElementById('taskAdditionalResources');
+    const generateAudioButton = document.getElementById('generateAudioButton');
+    const audioLoadingSpinner = document.getElementById('audioLoadingSpinner');
     const saveTaskBtn = document.getElementById('saveTaskBreakdown');
     
     if (generateTaskBtn) {
         generateTaskBtn.addEventListener('click', async function() {
+            // Show loading spinner and hide the result container
+            loadingSpinner.classList.remove('d-none');  // Show the spinner
+            taskResultDiv.classList.add('d-none');
+
+            // Clear the previous audio and hide the audio player
+            const audioPlayer = document.getElementById('audioPlayer');
+            audioPlayer.src = '';  
+            audioPlayer.classList.add('d-none');  
+
+            // Hide the audio loading spinner
+            audioLoadingSpinner.classList.add('d-none');
+
             const taskName = document.getElementById('taskName').value;
             const taskDetails = document.getElementById('taskDetails').value;
             const needsVisual = document.getElementById('needsVisual').checked;
@@ -148,14 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Show loading indicator
-            taskStepsList.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Generating task breakdown...</p></div>';
-            taskAccommodationsList.innerHTML = '';
-            taskResultDiv.classList.remove('d-none');
-            generateTaskBtn.disabled = true;
-
             try {
-                const response = await fetch('/ai/task-breakdown', {
+                const response = await fetch('/api/task-breakdown', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -174,37 +184,113 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     // Populate the steps list
                     taskStepsList.innerHTML = '';
-                    result.steps.forEach(step => {
+                    const stepsArray = result.steps_for_employee.split(' | ');
+                    stepsArray.forEach(step => {
                         const li = document.createElement('li');
                         li.className = 'mb-2';
-                        li.textContent = step;
+                        li.textContent = step.replace(/^\d+\.\s*/, ""); ;
                         taskStepsList.appendChild(li);
                     });
 
-                    // Populate the accommodations list
-                    taskAccommodationsList.innerHTML = '';
-                    result.accommodations.forEach(accommodation => {
+                    // Populate the note to job coach list
+                    taskNoteToJobCoachList.innerHTML = '';
+                    const notesArray = result.note_to_job_coach.split(' | ');
+                    notesArray.forEach(note => {
                         const li = document.createElement('li');
                         li.className = 'mb-2';
-                        li.textContent = accommodation;
-                        taskAccommodationsList.appendChild(li);
+                        li.textContent = note;
+                        taskNoteToJobCoachList.appendChild(li);
                     });
 
-                    // Show the save button
+                    // Populate the additional resources list
+                    taskAdditionalResourcesList.innerHTML = '';
+                    const resourcesArray = result.additional_training_resources.split(' | '); 
+                    resourcesArray.forEach(resource => {
+                        const [resourceName, resourceLink] = resource.split(': '); 
+
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+
+                        const a = document.createElement('a'); 
+                        a.href = resourceLink.trim(); 
+                        a.textContent = resourceName.trim(); 
+                        a.target = "_blank"; 
+
+                        li.appendChild(a); 
+                        taskAdditionalResourcesList.appendChild(li); 
+                    });
+
+                    // Show the save button, hide the spinner, and display the result
                     saveTaskBtn.classList.remove('d-none');
+                    loadingSpinner.classList.add('d-none');  
+                    taskResultDiv.classList.remove('d-none');
                 } else {
                     taskStepsList.innerHTML = `<p class="text-danger">Error: ${result.error}</p>`;
-                    taskAccommodationsList.innerHTML = '';
+                    loadingSpinner.classList.add('d-none');  
+                    // taskNoteToJobCoachList.innerHTML = '';
+                    // taskAdditionalResourcesList.innerHTML = '';
                 }
             } catch (error) {
                 console.error('Task breakdown error:', error);
                 taskStepsList.innerHTML = '<p class="text-danger">An error occurred while generating the breakdown.</p>';
-                taskAccommodationsList.innerHTML = '';
+                loadingSpinner.classList.add('d-none');  
+                // taskNoteToJobCoachList.innerHTML = '';
+                // taskAdditionalResourcesList.innerHTML = '';
             } finally {
                 generateTaskBtn.disabled = false;
             }
         });
+        generateAudioButton.addEventListener('click', async function() {
+            console.log('Generate audio button clicked');
+            const audioLoadingSpinner = document.getElementById('audioLoadingSpinner');
+            audioLoadingSpinner.classList.remove('d-none');
+            const taskSteps = [];  // Replace with the array containing notes to be converted to audio
+            taskStepsList.querySelectorAll('li').forEach(li => {
+                taskSteps.push(li.textContent);
+            });
 
+            const textToConvert = taskSteps.join(' '); // Combine notes into a single text string
+
+            try {
+                // Call the backend to generate audio
+                const response = await fetch('/api/generateAudio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: textToConvert })
+                });
+
+                if (response.ok) {
+                    // Parse the JSON response
+                    const data = await response.json();
+
+                    // Get the base64-encoded audio data
+                    const audioBase64 = data.audio;
+
+                    // Convert base64 string to binary data (audio)
+                    const audioBlob = new Blob([new Uint8Array(atob(audioBase64).split("").map(c => c.charCodeAt(0)))], { type: "audio/mpeg" });
+
+                    // Create an audio URL from the blob
+                    const audioUrl = URL.createObjectURL(audioBlob);
+
+                    // Get the audio player element
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    
+                    // Set the audio player source to the blob URL
+                    audioPlayer.src = audioUrl;
+
+                    // Make the audio player visible and remove spinner
+                    audioPlayer.classList.remove('d-none');
+                    audioLoadingSpinner.classList.add('d-none');
+                    // audioPlayer.play();
+                } else {
+                    console.error('Error generating audio:', response.statusText);
+                    audioLoadingSpinner.classList.add('d-none');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                audioLoadingSpinner.classList.add('d-none');
+            }
+        });
         saveTaskBtn.addEventListener('click', async function() {
             try {
                 const response = await fetch('/upload_note', {
@@ -212,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         category: 'Task Breakdown',
-                        content: `Task: ${document.getElementById('taskName').value}\nSteps:\n${Array.from(taskStepsList.children).map(li => li.textContent).join('\n')}\nAccommodations:\n${Array.from(taskAccommodationsList.children).map(li => li.textContent).join('\n')}`,
+                        content: `Task: ${document.getElementById('taskName').value}\nSteps:\n${Array.from(taskStepsList.children).map(li => li.textContent).join('\n')}\nNote to Job COach:\n${Array.from(taskNoteToJobCoachList.children).map(li => li.textContent).join('\n')}\nAdditional Resources:\n${Array.from(taskAdditionalResourcesList.children).map(li => li.textContent).join('\n')}`,
                         consumer_id: window.consumerId || 'c001'
                     })
                 });
@@ -231,6 +317,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Listen for when the modal is hidden (closed)
+    $('#taskBreakdownModal').on('hidden.bs.modal', function () {
+        // Reset form fields
+        document.getElementById('taskBreakdownForm').reset();
+        
+        // Reset steps, notes, and resources
+        document.getElementById('taskSteps').innerHTML = '';
+        document.getElementById('taskNoteToJobCoach').innerHTML = '';
+        document.getElementById('taskAdditionalResources').innerHTML = '';
+        
+        // Hide the audio player
+        const audioPlayer = document.getElementById('audioPlayer');
+        audioPlayer.classList.add('d-none');
+        audioPlayer.pause();
+        audioPlayer.src = '';  // Reset the audio source
+        
+        // Hide the loading spinner
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        
+        // Hide the result section
+        document.getElementById('taskBreakdownResult').classList.add('d-none');
+        
+        // Reset any other UI elements
+        document.getElementById('saveTaskBreakdown').classList.add('d-none');
+    });
+
+
     // Add functionality to the AI chat form
     // const aiChatForm = document.getElementById('aiChatForm');
     // if (aiChatForm) {
