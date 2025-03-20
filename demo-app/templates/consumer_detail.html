@@ -745,16 +745,37 @@
                         </div>
                     </div>
                     <div class="d-grid">
-                        <button type="button" class="btn btn-primary" id="generateTaskBreakdown">Generate Breakdown</button>
+                        <button type="button" class="btn btn-primary" id="generateTaskBreakdown">Generate Instruction</button>
                     </div>
                 </form>
                 
+                <!-- Spinner -->
+                <div id="loadingSpinner" class="text-center py-3 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Generating task breakdown...</p>
+                </div>
+
                 <div id="taskBreakdownResult" class="mt-4 d-none">
                     <h6 class="border-bottom pb-2 mb-3">Step-by-Step Instructions</h6>
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-primary" id="generateAudioButton">Generate Audio</button>
+                        <audio id="audioPlayer" controls class="d-none ms-3">
+                            <source id="audioSource" src="" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <!-- Audio Generation Spinner -->
+                        <div id="audioLoadingSpinner" class="spinner-border text-primary ms-3 d-none" role="status">
+                            <p class="visually-hidden">Generating audio...</span>
+                        </div>
+                    </div>
+
                     <ol id="taskSteps" class="ps-3"></ol>
                     
-                    <h6 class="border-bottom pb-2 mb-3 mt-4">Suggested Accommodations</h6>
-                    <ul id="taskAccommodations" class="ps-3"></ul>
+                    <h6 class="border-bottom pb-2 mb-3 mt-4">Note to Job Coach</h6>
+                    <ul id="taskNoteToJobCoach" class="ps-3"></ul>
+
+                    <h6 class="border-bottom pb-2 mb-3 mt-4">Additional Resources</h6>
+                    <ul id="taskAdditionalResources" class="ps-3"></ul>
                 </div>
             </div>
             <div class="modal-footer">

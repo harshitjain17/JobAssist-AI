@@ -6,6 +6,7 @@ import json
 import sys
 import io
 import time
+import base64
 from azure.storage.blob import BlobServiceClient
 import mimetypes
 import requests
@@ -23,6 +24,7 @@ FUNCTION_HTTP_OPENAI_URL = os.getenv("FUNCTION_HTTP_OPENAI_URL")
 FUNCTION_HTTP_OPENAI_WITH_INDEX_URL = os.getenv("FUNCTION_HTTP_OPENAI_WITH_INDEX_URL")
 FUNCTION_SAVE_INSIGHTS_URL = os.getenv("FUNCTION_SAVE_INSIGHTS_URL")
 FUNCTION_SEARCH_INSIGHTS_URL = os.getenv("FUNCTION_SEARCH_INSIGHTS_URL")
+FUNCTION_HTTP_TEXT_TO_SPEECH_URL = os.getenv("FUNCTION_HTTP_TEXT_TO_SPEECH_URL")
 
 SYSTEM_ROLE_TASKBREAKDOWN = os.getenv("SYSTEM_ROLE_TASKBREAKDOWN")
 SYSTEM_ROLE_CHAT = os.getenv("SYSTEM_ROLE_CHAT","chat")
@@ -219,7 +221,7 @@ def download_processed(filename):
         flash(f"Error downloading file: {str(e)}")
         return redirect(url_for('index'))
             
-@app.route('/ai/task-breakdown', methods=['POST'])
+@app.route('/api/task-breakdown', methods=['POST'])
 @login_required
 def ai_task_breakdown():
     try:
@@ -257,27 +259,20 @@ def ai_task_breakdown():
         response = requests.post(FUNCTION_HTTP_OPENAI_URL, json=payload, timeout=30)
         
         if response.status_code == 200:
-            result = response.json()
-            message = result.get('message', '')
+            response_data = response.json()
+            raw_message = response_data.get("message", {})
+            cleaned_response = raw_message.replace("```json", "").replace("```", "").strip()
+            response_message = json.loads(cleaned_response)
 
-            # Parse the response (assuming it’s a string with steps and accommodations)
-            steps = []
-            accommodations_list = []
-            current_list = steps
-            for line in message.split('\n'):
-                line = line.strip()
-                if line.startswith('Steps:') or line.startswith('Step-by-Step Instructions:'):
-                    current_list = steps
-                elif line.startswith('Accommodations:') or line.startswith('Suggested Accommodations:'):
-                    current_list = accommodations_list
-                elif line and line[0].isdigit():
-                    current_list.append(line)
-                elif line.startswith('- ') or line.startswith('* '):
-                    current_list.append(line[2:])
+            # Extract from response_message
+            steps_for_employee = response_message.get("steps_for_employee", "")
+            note_to_job_coach = response_message.get("note_to_job_coach", "")
+            additional_training_resources = response_message.get("additional_training_resources", "")  
 
             return jsonify({
-                'steps': steps,
-                'accommodations': accommodations_list
+                'steps_for_employee': steps_for_employee,
+                'note_to_job_coach': note_to_job_coach,
+                'additional_training_resources': additional_training_resources
             })
         else:
             return jsonify({'error': f"Failed to generate breakdown: {response.text}"}), 500
@@ -285,6 +280,31 @@ def ai_task_breakdown():
     except Exception as e:
         print(f"Error in task breakdown: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/generateAudio', methods=['POST'])
+@login_required
+def generate_audio():
+    print("generate_audio : Generating audio for task breakdown start")
+    try:
+        data = request.json
+        text = data.get('text')
+        if text:
+            payload = {"text" : text}
+            response = requests.post(FUNCTION_HTTP_TEXT_TO_SPEECH_URL, json=payload)
+            if response.status_code == 200:
+                # Encode the audio binary data to base64
+                audio_base64 = base64.b64encode(response.content).decode('utf-8')
+                # Return the audio data in JSON format
+                return jsonify({
+                    'audio': audio_base64
+                })
+            else:
+                return jsonify({'error': 'Failed to generate audio.'}), 400
+        else:
+            return jsonify({'error': 'No text provided for audio generation'}), 400
+    except Exception as e:
+        print(f"Error while generating audio for task breakdown: {str(e)}")
+        return jsonify({'error': str(e)}), 500        
 
 # Add this new route for the AI chat functionality
 @app.route('/api/chat', methods=['POST'])

@@ -294,7 +294,7 @@ main {
     padding: 1rem;
 }
 
-#taskSteps li, #taskAccommodations li {
+#taskSteps li, #taskNoteToJobCoach li, #taskAdditionalResources li {
     margin-bottom: 0.75rem;
     line-height: 1.5;
 }
