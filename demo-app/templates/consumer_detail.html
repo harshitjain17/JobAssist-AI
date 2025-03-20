@@ -128,6 +128,19 @@
         
         <!-- Middle Column - Appointments & Activity -->
         <div class="col-lg-4 mb-4">
+            <!-- Task Breakdown Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-tasks me-2"></i>Task Breakdown</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#taskBreakdownModal">
+                        <i class="fas fa-plus"></i> New Task
+                    </button>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Break down job tasks into manageable steps with accommodations for {{ consumer.name }}.</p>
+                </div>
+            </div>       
+
             <!-- Appointments Card -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -320,19 +333,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Task Breakdown Card -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0"><i class="fas fa-tasks me-2"></i>Task Breakdown</h5>
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#taskBreakdownModal">
-                        <i class="fas fa-plus"></i> New Task
-                    </button>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">Break down job tasks into manageable steps with accommodations for {{ consumer.name }}.</p>
-                </div>
-            </div>            
+     
         </div>
     </div>
 </div>
