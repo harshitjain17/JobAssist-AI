@@ -23,6 +23,7 @@ You may receive general or specific questions and you should helpfully respond a
 You may also receive structured detail regarding the context in which the question is being asked such as an event that has taken place or detail regarding a consumer.
 If you receive only the structured detail, respond with the next best action that should be taken based on this detail.
 If the detail is accompanied by an inquiry, incorporate the detail as context to provide a more targeted response.
+You should format your response using simple html tags (e.g. ul, li, a, b) that can be embedded in the user's chat window.
 """
 
 DEFAULT_DATA_SOURCES = {
@@ -41,6 +42,16 @@ DEFAULT_DATA_SOURCES = {
     ]
 }
 
+def log_chat_history(system_prompt, user_prompt, response):
+    return
+    print("Logging chat history...")
+    with open("chat_history.log", "a") as f:
+        f.write("=" * 80 + "\n")
+        f.write(f"Timestamp: {datetime.now().isoformat()}\n")
+        f.write(f"System: {system_prompt}\n")
+        f.write(f"User: {user_prompt}\n")
+        f.write(f"Response:\n{json.dumps(response.to_dict())}\n\n\n")
+
 def create_chat_completion(
         user_content=None,
         user_context=None,
@@ -51,7 +62,7 @@ def create_chat_completion(
         top_p=1.0,
         model=model_name
     ):
-    
+    # print("[create_chat_completion]")
     user_prompt = ""
     # If user_context is provided, it can include formatting preferences
     # such as {"response_format": "simple_html"} to get HTML formatted responses
@@ -80,7 +91,9 @@ def create_chat_completion(
         temperature=temperature,
         top_p=top_p,
         model=model,
+        extra_body=data_sources
     )
+    log_chat_history(system_prompt, user_prompt, response)
     return response
 
 if __name__ == "__main__":
@@ -93,6 +106,7 @@ if __name__ == "__main__":
     You may also receive structured detail regarding the context in which the question is being asked such as an event that has taken place or detail regarding a consumer.
     If you receive only the structured detail, respond with the next best action that should be taken based on this detail.
     If the detail is accompanied by an inquiry, incorporate the detail as context to provide a more targeted response.
+    You should format your response using simple html tags (e.g. ul, li, a, b) that can be embedded in the user's chat window.
     """
 
     user_content = "What are the key responsibilities of a job placement specialist?"

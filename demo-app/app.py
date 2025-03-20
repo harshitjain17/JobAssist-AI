@@ -306,6 +306,8 @@ def chat():
             "response_format": "simple_html"
         }
         
+        # print(user_context)
+        # print(user_content)
         # Get the response from the OpenAI API with the formatting context
         response = create_chat_completion(
             user_content=user_content,

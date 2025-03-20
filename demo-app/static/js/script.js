@@ -232,52 +232,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add functionality to the AI chat form
-    const aiChatForm = document.getElementById('aiChatForm');
-    if (aiChatForm) {
-        aiChatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const input = this.querySelector('input');
-            const message = input.value.trim();
+    // const aiChatForm = document.getElementById('aiChatForm');
+    // if (aiChatForm) {
+    //     aiChatForm.addEventListener('submit', function(e) {
+    //         e.preventDefault();
+    //         const input = this.querySelector('input');
+    //         const message = input.value.trim();
             
-            if (message) {
-                // Add user message to chat
-                addMessage('user', message);
+    //         if (message) {
+    //             // Add user message to chat
+    //             addMessage('user', message);
                 
-                // Clear input
-                input.value = '';
+    //             // Clear input
+    //             input.value = '';
                 
-                // Show typing indicator
-                const chatContainer = document.querySelector('.chat-container');
-                const typingDiv = document.createElement('div');
-                typingDiv.className = 'chat-message ai-message mb-3 typing-indicator';
-                typingDiv.innerHTML = `
-                    <div class="d-flex">
-                        <div class="avatar-circle bg-primary text-white me-2">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="message-content p-3 bg-white rounded">
-                            <div class="typing-dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                chatContainer.appendChild(typingDiv);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+    //             // Show typing indicator
+    //             const chatContainer = document.querySelector('.chat-container');
+    //             const typingDiv = document.createElement('div');
+    //             typingDiv.className = 'chat-message ai-message mb-3 typing-indicator';
+    //             typingDiv.innerHTML = `
+    //                 <div class="d-flex">
+    //                     <div class="avatar-circle bg-primary text-white me-2">
+    //                         <i class="fas fa-robot"></i>
+    //                     </div>
+    //                     <div class="message-content p-3 bg-white rounded">
+    //                         <div class="typing-dots">
+    //                             <span></span>
+    //                             <span></span>
+    //                             <span></span>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             `;
+    //             chatContainer.appendChild(typingDiv);
+    //             chatContainer.scrollTop = chatContainer.scrollHeight;
                 
-                // Simulate AI response (for demo)
-                setTimeout(() => {
-                    // Remove typing indicator
-                    chatContainer.removeChild(typingDiv);
+    //             // Simulate AI response (for demo)
+    //             setTimeout(() => {
+    //                 // Remove typing indicator
+    //                 chatContainer.removeChild(typingDiv);
                     
-                    // Add AI response
-                    simulateAIResponse(message);
-                }, 1500);
-            }
-        });
-    }
+    //                 // Add AI response
+    //                 simulateAIResponse(message);
+    //             }, 1500);
+    //         }
+    //     });
+    // }
     
     // Add functionality to job search in consumer profile
     const jobSearchForm = document.querySelector('#jobSearchModal form');

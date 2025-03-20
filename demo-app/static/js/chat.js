@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Only initialize if we're on a page with the chat UI
     const chatForm = document.getElementById('aiChatForm');
-    const userInput = document.getElementById('userInput');
+    const userInput = document.getElementById('aiChatUserInput');
     const chatContainer = document.getElementById('chatContainer');
     
     if (!chatForm || !userInput || !chatContainer) {
@@ -17,10 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle form submission
     chatForm.addEventListener('submit', async function(e) {
-        console.log('Form submitted'); // Debug statement
+        console.log('Chat form submitted'); // Debug statement
         e.preventDefault();
         
+        // console.log(userInput.outerHTML);
+        // userInput.style.border = '5px solid red';
         const userContent = userInput.value.trim();
+        console.log(userContent);
         if (!userContent) {
             console.log('Empty input, ignoring submission');
             return;
