@@ -293,12 +293,15 @@ def chat():
     try:
         data = request.json
         user_content = data.get('user_content')
-        user_context = data.get('user_context')
+        user_context = data.get('user_context',{})
+        consumer_id = data.get('consumer_id', 'c001')  # Default to 'c001' if not provided
+        # Get consumer info from models
+        consumer = consumers.get(consumer_id, {})
+
         # Add a user_context parameter to request simple HTML formatting
-        if not user_context:
-            user_context = {
-                "response_format": "simple_html"
-            }
+        user_context['response_format'] = "simple_html"
+        # Add the current consumer info to the user context
+        user_context['consumer'] = consumer
         
         if not user_content:
             return jsonify({
@@ -365,6 +368,68 @@ def chat():
             'error': str(e),
             'response': "Sorry, an error occurred while processing your request."
         }), 500
+
+# Determine next best action based on event trigger & context
+@app.route('/api/next-best-action', methods=['POST'])
+@login_required
+def next_best_action():
+    try:
+        data = request.json
+        print(data)
+        consumer_id = data.get('consumer_id')
+        appointment_id = data.get('appointment_id')
+        event_trigger = data.get('event_trigger')
+        event_value = data.get('event_value')
+        
+        if not (consumer_id and appointment_id and event_trigger and event_value):
+            return jsonify({
+                'error': 'Missing required data',
+                'response': 'Please provide consumer_id, appointment_id, event_trigger, and event_value.'
+            }), 400        
+        
+        # Get consumer info from models
+        consumer = consumers.get(consumer_id, {})
+        for appointment in appointments:
+            if appointment['id'] == appointment_id:
+                break
+        # appointment = appointments.get(appointment_id, {})
+
+        user_context = {}
+        # Add a user_context parameter to request simple HTML formatting
+        user_context['response_format'] = "simple_html"
+        # Add the current context info to the user context
+        user_context['consumer'] = consumer
+        user_context['appointment'] = appointment
+        # Add the event details to the user context
+        user_context['event_trigger'] = event_trigger
+        user_context['event_value'] = event_value
+
+        # For debugging, let's log the request
+        print(f"next_best_action request received:\n{json.dumps(user_context,indent=2)}")
+        
+        user_prompt = f"{json.dumps(user_context)}"
+
+        # Prepare payload for Azure Function
+        payload = {
+            "system_role": SYSTEM_ROLE_CHAT,
+            "user_prompt": user_prompt
+        }
+
+        # Call Azure Function
+        response = requests.post(FUNCTION_HTTP_OPENAI_WITH_INDEX_URL, json=payload, timeout=30)
+        
+        if response.status_code == 200:
+            result = response.json()
+            message = result.get('message', '').replace('```html', '').replace('```', '')
+            return jsonify({
+                'response': message,
+            })
+        else:
+            return jsonify({'error': f"Failed to generate next_best_action response: {response.text}"}), 500
+
+    except Exception as e:
+        print(f"Error in next_best_action: {str(e)}")
+        return jsonify({'error': str(e)}), 500      
 
 @app.route('/api/search-knowledge-base', methods=['POST'])
 @login_required
