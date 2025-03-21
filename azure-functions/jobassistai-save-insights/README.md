@@ -47,7 +47,7 @@ jobassistai-save-insights/
 2. **Processing**:
    - The function generates embeddings of details using `text-embedding-ada-002`.
    - Saves insights in Azure Cosmos DB.
-3. **Output**: Generated response is returned to the caller in JSON format.
+3. **Output**: Generated response is returned to the caller in text format.
 
 ## Dependencies
 
