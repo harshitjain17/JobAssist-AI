@@ -1,5 +1,5 @@
 # JobAssist AI  
-**Empowering Job Coaches, Transforming Lives**  
+**Empowering Coaches, Transforming Lives**  
 
 [![Deployed on Azure](https://img.shields.io/badge/Deployed%20on-Azure-blue?logo=microsoft-azure)](https://jobassistai-dhbzhtbxerdwedhh.eastus2-01.azurewebsites.net/)  
 *Built for the Microsoft Innovation Challenge, March 2025*  
