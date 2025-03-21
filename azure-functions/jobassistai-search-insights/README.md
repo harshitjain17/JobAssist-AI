@@ -18,7 +18,7 @@ This Azure Function enables job coaches to search insights stored in **Azure Cos
 jobassistai-search-insights/
 ├── function_app.py              # Main entry point with the Azure Function
 ├── config.py                    # Environment variables and configuration
-├── clients.py                   # Client initializations (SpeechSDK)
+├── clients.py                   # Client initializations (OpenAI, COsmos and Azure AI Search URL)
 ├── requirements.txt             # Python dependencies
 ├── README.md                    # Project documentation (this file)
 └── host.json                    # Azure Functions configuration (auto-generated or customized)
