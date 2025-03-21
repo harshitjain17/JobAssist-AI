@@ -1,5 +1,0 @@
-azure-storage-blob
-azure-cognitiveservices-speech
-python-dotenv
-openai
-requests
