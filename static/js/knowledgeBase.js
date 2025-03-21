@@ -178,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById("addInsightForm").addEventListener("submit", async function(event) {
         event.preventDefault();
+        saveInsightLoadingSpinner.classList.remove("d-none"); // Show loading spinner while saving
+        savingInsightMessage.classList.remove("d-none"); // Hide previous message
         
         // Get form values
         const category = document.getElementById("category").value;
@@ -200,9 +202,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!response.ok) {
                 document.getElementById("addInsightErrorMessage").classList.remove("d-none");
+                saveInsightLoadingSpinner.classList.add("d-none"); 
+                savingInsightMessage.classList.add("d-none"); 
             } else {
                 // Show success message
                 document.getElementById("addInsightSuccessMessage").classList.remove("d-none");
+
+                saveInsightLoadingSpinner.classList.add("d-none"); 
+                savingInsightMessage.classList.add("d-none"); 
 
                 // Clear input fields but keep form open
                 document.getElementById("category").value = "";
@@ -210,6 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             document.getElementById("addInsightErrorMessage").classList.remove("d-none");
+            saveInsightLoadingSpinner.classList.add("d-none"); 
+            savingInsightMessage.classList.add("d-none"); 
         }
     
     });

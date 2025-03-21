@@ -34,7 +34,7 @@ blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CON
 
 # Add the parent directory to sys.path to import from chat package
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from chat.chat import create_chat_completion
+from prototype.chat.chat import create_chat_completion
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'hackathon-demo-secret-key'
