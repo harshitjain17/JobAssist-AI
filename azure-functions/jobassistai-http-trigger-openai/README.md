@@ -2,16 +2,19 @@
 
 ## Overview
 
-This Azure Function integrates with **Azure OpenAI** to generate responses based on a predefined **system prompt** and a **user prompt**. It is designed to be reusable for various OpenAI-powered requests and is currently used for task breakdown in JobAssistAI application.
+This Azure Function integrates with **Azure OpenAI** to generate responses based on a predefined **system prompt** and a **user prompt**. It supports two main HTTP-triggered endpoints for different use cases:
+
+1. **Basic OpenAI Integration**: Standard function to process user prompts with a system prompt.
+2. **OpenAI with Azure Search Integration**: Extended function that queries Azure Search data sources and provides citations in the response.
 
 ## Features
 
 - **HTTP Triggered**: Invoked via HTTP request.
-- **Dynamic Prompting**: Uses `system_prompt_mapping.json` to retrieve the appropriate system prompt based on the provided system role.
+- **Dynamic Prompting**: Retrieves system prompt based on the system role from `system_prompt_mapping.json`.
 - **Azure OpenAI Integration**: Calls Azure OpenAI API to generate structured responses.
+- **Azure Search Integration**: The second endpoint integrates with Azure Search to include citations in the response.
 - **JSON-based Input & Output**: Accepts input in JSON format and returns structured AI-generated responses.
-- **Modular Design**: Organized into reusable modules for configuration, clients and system prompt mapping.
-- **Reusability**: Enable reusability by adding a new system role in `system_prompt_mapping.json` and sending HTTP requests with this system role and user prompt.
+- **Modular Design**: Organized into reusable modules for configuration, clients, and system prompt mapping.
 
 ## Directory Structure
 ```
@@ -33,12 +36,13 @@ jobassistai-http-trigger-openai/
 
 ## Usage
 
-1. **HTTP Trigger**: Send a HTTP trigger with system role and user prompt.
+1. HTTP Trigger: Send an HTTP request with a `system_role` and `user_prompt` (and optional data_sources for the second endpoint).
 2. **Processing**:
-   - The function extracts system role and user prompt from the request.
-   - References `system_prompt_mapping.json` to retrieve the appropriate system prompt based on the provided system role.
-   - Calls Azure OpenAI to generate a structured response based on the combined system and user prompts.
-3. **Output**: Generated response is returned to the caller in JSON format.
+   - The function extracts `system_role` and `user_prompt` from the request.
+   - The system prompt is retrieved from `system_prompt_mapping.json` based on the `system_role`.
+   - The Azure OpenAI API is called to generate a structured response.
+   - If the second endpoint is used, additional data sources (like Azure Search) are queried, and citations are included in the response.
+3. **Output**: The generated response, along with citations if applicable, is returned in JSON format.
 
 ## Dependencies
 
