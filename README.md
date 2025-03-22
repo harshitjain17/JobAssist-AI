@@ -68,7 +68,7 @@ JobAssist AI integrates a robust set of Azure services with a Flask frontend:
 - **Azure Key Vault**: Secures sensitive credentials.
 
 ### System Architecture Diagram  
-![JobAssist AI System Architecture](path/to/system-architecture.png)
+![JobAssist AI System Architecture](docs/JobAssistAI-system-architecture.png)
 
 ---
 
