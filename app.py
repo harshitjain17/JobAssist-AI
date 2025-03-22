@@ -510,7 +510,7 @@ def save_knowledge_base():
                         })
                 else:
                     return jsonify({
-                        'error': str(e),
+                        'error': 'Unable to save insight in cosmos db',
                         'response': "Error occured while saving insight."
                     }), 500
             except Exception as e:

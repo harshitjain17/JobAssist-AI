@@ -156,8 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const taskName = document.getElementById('taskName').value;
             const taskDetails = document.getElementById('taskDetails').value;
-            const needsVisual = document.getElementById('needsVisual').checked;
-            const needsSimplified = document.getElementById('needsSimplified').checked;
+            // const needsVisual = document.getElementById('needsVisual').checked;
+            // const needsSimplified = document.getElementById('needsSimplified').checked;
 
             if (!taskName || !taskDetails) {
                 alert('Please enter a task name and details.');
@@ -171,10 +171,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         task_name: taskName,
                         task_details: taskDetails,
-                        accommodations: {
-                            needsVisual: needsVisual,
-                            needsSimplified: needsSimplified
-                        },
+                        // accommodations: {
+                        //     needsVisual: needsVisual,
+                        //     needsSimplified: needsSimplified
+                        // },
                         consumer_id: window.consumerId || 'c001' // Fallback to 'c001' if not set
                     })
                 });
