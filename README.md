@@ -58,11 +58,13 @@ JobAssist AI integrates a robust set of Azure services with a Flask frontend:
 
 - **Azure AI Document Intelligence**: Text extraction from notes.  
 - **Azure OpenAI (GPT-4o)**: Report generation and task breakdowns.  
+- **Azure OpenAI Embeddings Model**: Generates vector embeddings for text to enable semantic search and similarity matching in the knowledge base.  
+- **Azure AI Whisper**: Speech-to-text transcription for converting voice insights into searchable text.  
 - **Azure Blob Storage**: Secure file storage with versioning.  
 - **Azure Cosmos DB**: Scalable knowledge base.  
 - **Azure AI Search**: Rapid data retrieval.  
 - **Azure Speech Services**: Text-to-speech for accessibility.  
-- **Azure Functions**: Workflow automation.
+- **Azure Functions**: Workflow automation.  
 - **Azure Key Vault**: Secures sensitive credentials.
 
 ### System Architecture Diagrams
@@ -206,6 +208,7 @@ We’re committed to ethical AI. For a detailed look at how JobAssist AI upholds
    ```bash
    python app.py  # Flask app
    func start     # Azure Functions (from azure-functions/)
+
 ## 📜 License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and share!
 
