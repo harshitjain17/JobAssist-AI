@@ -299,7 +299,7 @@ def generate_audio():
                     'audio': audio_base64
                 })
             else:
-                return jsonify({'error': 'Failed to generate audio.'}), 400
+                return jsonify({'error': 'Failed to generate audio.'}), 400 
         else:
             return jsonify({'error': 'No text provided for audio generation'}), 400
     except Exception as e:
