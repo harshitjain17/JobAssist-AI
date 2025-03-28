@@ -112,13 +112,11 @@ JobAssistAI/
 │   ├── jobassistai-document-processing/   # Auto-generates reports from notes
 │   ├── jobassistai-http-trigger-openai/   # OpenAI-powered responses
 │   ├── jobassistai-http-trigger-tts/      # Text-to-speech for task guides
-│   ├── jobassistai-save-insights/         # [Placeholder: Details TBD]
-│   ├── jobassistai-save-voice-insights/   # [Placeholder: Details TBD]
-│   ├── jobassistai-search-insights/       # [Placeholder: Details TBD]
-├── docs/                                  # Documentation
-│   └── Microsoft-RAI-Impact-Assessment-JobAssistAI.pdf
+│   ├── jobassistai-save-insights/         # Saves insights in Azure Cosmos DB for AI-powered searches
+│   ├── jobassistai-save-voice-insights/   # Transcribes audio files and saves insights to Cosmos DB
+│   ├── jobassistai-search-insights/       # Converts natural language queries to embeddings and retrieves relevant information
+├── docs/                                  # Documentation (Contains RAI impact assessment and system architecture diagrams)
 ├── onedrive/                              # OneDrive integration
-│   └── onedrive_manager.py
 ├── static/                                # Frontend assets
 │   ├── css/
 │   └── js/
