@@ -1,4 +1,4 @@
-# JobAssist AI  
+# JobAssistAI  
 **Empowering Coaches, Transforming Lives**  
 
 ![Deployed on Azure](https://img.shields.io/badge/Deployed%20on-Azure-blue?logo=microsoft-azure)  
@@ -6,13 +6,20 @@
 
 ---
 
-## 🚀 What is JobAssist AI?  
+## 🚀 What is JobAssistAI?  
 
-**JobAssist AI** is an innovative application crafted to enhance the productivity of job coaches in supported employment programs for individuals with disabilities, including those with intellectual, developmental, or physical challenges. Built entirely on **Microsoft Azure**, this solution optimizes workflows, delivers personalized support, and promotes independence for clients. 
+**JobAssistAI** is an innovative application crafted to enhance the productivity of job coaches in supported employment programs for individuals with disabilities, including those with intellectual, developmental, or physical challenges. Built entirely on **Microsoft Azure**, this solution optimizes workflows, delivers personalized support, and promotes independence for clients. 
 
-By facilitating job matching in sectors such as retail, healthcare, IT, and manufacturing, automating report generation, and simplifying task breakdowns, JobAssist AI alleviates administrative burdens, enabling coaches to prioritize their core mission: empowering people.
+By facilitating job matching in sectors such as retail, healthcare, IT, and manufacturing, automating report generation, and simplifying task breakdowns, JobAssistAI alleviates administrative burdens, enabling coaches to prioritize their core mission: empowering people.
 
-Developed as part of the **Microsoft Innovation Challenge in March 2025**, this Flask-based application harnesses Azure's advanced AI and cloud capabilities to address pressing real-world challenges. JobAssist AI reflects a commitment to inclusion, transforming it from an aspiration into actionable impact.
+Developed as part of the **Microsoft Innovation Challenge in March 2025**, this Flask-based application harnesses Azure's advanced AI and cloud capabilities to address pressing real-world challenges. JobAssistAI reflects a commitment to inclusion, transforming it from an aspiration into actionable impact.
+
+---
+
+## 📺 Demo & Presentation  
+
+- 🎥 **Demo Video**: [Watch Here](https://drive.google.com/file/d/1WZBuEvlH_3rdswkA7YRR_qAmFrRFT0Tu/view?usp=sharing)  
+- 📊 **Project Presentation (PPT)**: [View Slides](https://docs.google.com/presentation/d/1o8F_btWSaLwPV646AaUIfBHY35yIDM6E/edit?usp=sharing&ouid=112367915427564567168&rtpof=true&sd=true)  
 
 ---
 
@@ -24,7 +31,7 @@ Job coaches play a vital role, yet they face significant obstacles that hinder t
 - **Lost Knowledge:** Insights vanish when coaches leave, leaving new hires scrambling.  
 - **Bureaucratic Maze:** Navigating fragmented resources and guidelines steals time from coaching.
 
-JobAssist AI redefines this landscape by automating repetitive tasks, centralizing expertise, and providing tailored support through a unified Azure-powered platform.
+JobAssistAI redefines this landscape by automating repetitive tasks, centralizing expertise, and providing tailored support through a unified Azure-powered platform.
 
 ---
 
@@ -54,7 +61,7 @@ JobAssist AI redefines this landscape by automating repetitive tasks, centralizi
 
 ## 🛠️ Technical Architecture  
 
-JobAssist AI integrates a robust set of Azure services with a Flask frontend:
+JobAssistAI integrates a robust set of Azure services with a Flask frontend:
 
 - **Azure AI Document Intelligence**: Text extraction from notes.  
 - **Azure OpenAI (GPT-4o)**: Report generation and task breakdowns.  
@@ -71,7 +78,7 @@ JobAssist AI integrates a robust set of Azure services with a Flask frontend:
 
 #### Overall System Architecture
 The following diagram provides a high-level overview of JobAssist AI’s architecture:
-![JobAssist AI System Architecture](docs/JobAssistAI-system-architecture.png)
+![JobAssistAI System Architecture](docs/JobAssistAI-system-architecture.png)
 
 #### Feature-Specific Architectures  
 Below are detailed architecture diagrams for each key feature, illustrating their specific workflows:
@@ -164,7 +171,7 @@ JobAssistAI/
 
 ## 🌍 Responsible AI  
 
-We’re committed to ethical AI. For a detailed look at how JobAssist AI upholds responsible AI principles, check out our [Responsible AI Impact Assessment](docs/Microsoft-RAI-Impact-Assessment-JobAssistAI.pdf). 
+We’re committed to ethical AI. For a detailed look at how JobAssistAI upholds responsible AI principles, check out our [Responsible AI Impact Assessment](docs/Microsoft-RAI-Impact-Assessment-JobAssistAI.pdf). 
 
 ---
 
